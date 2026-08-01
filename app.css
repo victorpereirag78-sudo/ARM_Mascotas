@@ -1,0 +1,215 @@
+/* ================================================================
+   APP.CSS — Chrome del shell autenticado (sidebar, header, paneles)
+   Reutiliza las variables de :root definidas en login.css.
+   ================================================================ */
+
+body { background: var(--color-fondo); }
+
+.app-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────── */
+.sidebar {
+    background: var(--color-superficie);
+    border-right: 1px solid var(--color-borde);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px 24px;
+}
+.sidebar-logo { font-size: 26px; }
+.sidebar-nombre { font-weight: 700; font-size: 17px; }
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: var(--color-texto-suave);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.nav-item:hover { background: var(--color-fondo); color: var(--color-texto); }
+.nav-item.activo { background: var(--color-primario); color: #fff; }
+.nav-item .nav-icono { font-size: 17px; width: 20px; text-align: center; }
+
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-borde);
+}
+.btn-tema-inline, .btn-logout {
+    border: 1px solid var(--color-borde);
+    background: var(--color-fondo);
+    color: var(--color-texto);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+}
+.btn-logout:hover { background: var(--color-error); color: #fff; border-color: var(--color-error); }
+
+/* ── Header ───────────────────────────────────────────────────── */
+.app-main { display: flex; flex-direction: column; min-width: 0; }
+
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--color-borde);
+    background: var(--color-superficie);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.app-header-titulo { font-size: 19px; margin: 0; flex: 1; }
+.app-header-usuario { font-size: 13px; color: var(--color-texto-suave); }
+.btn-hamburguesa {
+    display: none;
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--color-texto);
+}
+
+.app-contenido {
+    padding: 24px 28px 90px;
+    flex: 1;
+}
+
+.panel { animation: aparecer 0.25s ease; }
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Tarjetas genéricas reutilizadas por los módulos ─────────── */
+.card {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    padding: 20px;
+}
+
+.form-panel-embed {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    padding: 24px;
+    max-width: 640px;
+}
+
+.btn-secundario {
+    padding: 10px 16px;
+    border-radius: 9px;
+    border: 1px solid var(--color-borde);
+    background: transparent;
+    color: var(--color-texto);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-secundario:hover { background: var(--color-fondo); }
+
+.btn-peligro {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-error);
+    background: transparent;
+    color: var(--color-error);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-peligro:hover { background: var(--color-error); color: #fff; }
+
+.estado-vacio {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--color-texto-suave);
+}
+.estado-vacio .estado-vacio-icono { font-size: 40px; display: block; margin-bottom: 12px; }
+
+/* ── Bottom nav (móvil) ───────────────────────────────────────── */
+.bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--color-superficie);
+    border-top: 1px solid var(--color-borde);
+    z-index: 10;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 10px;
+    color: var(--color-texto-suave);
+    background: none;
+    border: none;
+    padding: 6px 0;
+    cursor: pointer;
+}
+.bottom-nav-item.activo { color: var(--color-primario); }
+.bottom-nav-item .nav-icono { font-size: 19px; }
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 15;
+}
+.sidebar-overlay.visible { display: block; }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .app-shell { grid-template-columns: 1fr; }
+
+    .sidebar {
+        position: fixed;
+        top: 0; bottom: 0; left: 0;
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        z-index: 20;
+    }
+    .sidebar.abierto { transform: translateX(0); }
+
+    .btn-hamburguesa { display: block; }
+    .app-contenido { padding: 18px 16px 90px; }
+    .app-header { padding: 14px 16px; }
+
+    .bottom-nav { display: flex; justify-content: space-around; }
+}

@@ -1,0 +1,27 @@
+/* ================================================================
+   REGISTRO.CSS — Extiende login.css para el formulario de alta,
+   más largo y de dos columnas.
+   ================================================================ */
+
+.registro-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 20px;
+}
+
+.form-card-ancha {
+    max-width: 640px;
+    width: 100%;
+}
+
+.nota-foto {
+    font-size: 13px;
+    color: var(--color-texto-suave);
+    background: var(--color-fondo);
+    border: 1px dashed var(--color-borde);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0 20px;
+}

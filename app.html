@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0ea5a1">
+    <title>ARM Mascotas</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="modulo-dashboard.css">
+    <link rel="stylesheet" href="modulo-perfil.css">
+    <link rel="stylesheet" href="modulo-mascota.css">
+    <link rel="stylesheet" href="modulo-compartir.css">
+</head>
+<body>
+
+    <div class="app-shell">
+
+        <!-- ── Sidebar (escritorio) ─────────────────────────────── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <span class="sidebar-logo">🐾</span>
+                <span class="sidebar-nombre">ARM Mascotas</span>
+            </div>
+
+            <nav class="sidebar-nav" id="navPrincipal">
+                <!-- Los ítems se generan en app.js según ROL_MODULOS -->
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="btnTema" class="btn-tema-inline" type="button" title="Cambiar tema">🌙 Tema</button>
+                <button id="btnLogout" class="btn-logout" type="button">↩ Salir</button>
+            </div>
+        </aside>
+
+        <!-- ── Contenido ─────────────────────────────────────────── -->
+        <div class="app-main">
+
+            <header class="app-header">
+                <button class="btn-hamburguesa" id="btnHamburguesa" aria-label="Abrir menú">☰</button>
+                <h1 class="app-header-titulo" id="tituloPanel">Dashboard</h1>
+                <div class="app-header-usuario" id="usuarioResumen"></div>
+            </header>
+
+            <main class="app-contenido">
+
+                <section class="panel" id="panel-dashboard" data-titulo="Dashboard"></section>
+
+                <section class="panel" id="panel-mascotas" data-titulo="Mis mascotas" hidden></section>
+
+                <section class="panel" id="panel-perfil" data-titulo="Mi perfil" hidden></section>
+
+                <section class="panel" id="panel-compartir" data-titulo="Compartir" hidden></section>
+
+            </main>
+        </div>
+
+        <!-- ── Navegación inferior (móvil) ──────────────────────── -->
+        <nav class="bottom-nav" id="bottomNav">
+            <!-- Se genera en app.js, espejo de navPrincipal -->
+        </nav>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="config.local.js" onerror="this.remove()"></script>
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+    <script src="modulo-dashboard.js"></script>
+    <script src="modulo-perfil.js"></script>
+    <script src="modulo-mascota.js"></script>
+    <script src="modulo-compartir.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+/* ================================================================
+   LOGIN.CSS — Pantalla de acceso (también usada como base visual
+   de registro.html vía registro.css, que reutiliza estas variables)
+   ================================================================ */
+
+:root {
+    --color-primario: #0ea5a1;
+    --color-primario-oscuro: #0a7c79;
+    --color-secundario: #2f8ab3;
+    --color-fondo: #f7f5f2;
+    --color-superficie: #ffffff;
+    --color-texto: #24211f;
+    --color-texto-suave: #6b6560;
+    --color-borde: #e6e1da;
+    --color-error: #d64545;
+    --color-exito: #2f9e58;
+    --sombra-card: 0 20px 60px -20px rgba(36, 33, 31, 0.25);
+    --radio: 16px;
+}
+
+:root[data-theme="dark"] {
+    --color-fondo: #17151a;
+    --color-superficie: #211e24;
+    --color-texto: #f3f1ee;
+    --color-texto-suave: #a8a29b;
+    --color-borde: #34303a;
+    --sombra-card: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-fondo: #17151a;
+        --color-superficie: #211e24;
+        --color-texto: #f3f1ee;
+        --color-texto-suave: #a8a29b;
+        --color-borde: #34303a;
+        --sombra-card: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+    }
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--color-fondo);
+    color: var(--color-texto);
+    min-height: 100vh;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.btn-tema {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 20;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-borde);
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-wrapper {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.brand-panel {
+    background: linear-gradient(160deg, var(--color-primario), var(--color-primario-oscuro));
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px;
+}
+
+.brand-content { margin-top: 12vh; }
+.brand-logo { font-size: 48px; line-height: 1; }
+.brand-title { font-size: 40px; line-height: 1.1; margin: 20px 0 12px; font-weight: 700; }
+.brand-sub { font-size: 16px; opacity: 0.9; margin: 0 0 24px; line-height: 1.5; }
+.brand-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag {
+    background: rgba(255,255,255,0.18);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+}
+.brand-footer { font-size: 13px; opacity: 0.75; }
+
+/* En pantallas angostas, el panel de marca pasa a ser una franja
+   delgada arriba (logo + nombre en línea) en vez de un bloque grande
+   sin información funcional; el formulario pasa a ser lo principal. */
+@media (max-width: 860px) {
+    .login-wrapper { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+
+    .brand-panel {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+    }
+    .brand-content {
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .brand-logo { font-size: 26px; }
+    .brand-title { font-size: 18px; margin: 0; }
+    .brand-title br { display: none; }
+    .brand-sub, .brand-tags, .brand-footer { display: none; }
+}
+
+.form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--color-superficie);
+    border-radius: var(--radio);
+    padding: 36px 32px;
+    box-shadow: var(--sombra-card);
+}
+
+.form-header h2 { margin: 0 0 4px; font-size: 24px; }
+.form-header p { margin: 0 0 28px; color: var(--color-texto-suave); font-size: 14px; }
+
+.field-group { margin-bottom: 18px; }
+.field-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+
+.input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 0 12px;
+    background: var(--color-fondo);
+}
+.input-wrap:focus-within { border-color: var(--color-primario); }
+.input-icon { width: 18px; height: 18px; color: var(--color-texto-suave); flex-shrink: 0; }
+
+.input-wrap input, .input-wrap select {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 12px 4px;
+    font-size: 14px;
+    color: var(--color-texto);
+    width: 100%;
+    font-family: inherit;
+}
+
+.field-error {
+    display: block;
+    min-height: 16px;
+    color: var(--color-error);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.field-msg {
+    font-size: 13px;
+    min-height: 0;
+    margin-bottom: 4px;
+}
+.field-msg.msg-error { color: var(--color-error); margin-bottom: 12px; }
+.field-msg.msg-exito { color: var(--color-exito); margin-bottom: 12px; }
+
+.btn-primario {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: var(--color-primario);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.btn-primario:hover { background: var(--color-primario-oscuro); }
+.btn-primario:active { transform: scale(0.98); }
+.btn-primario:disabled { opacity: 0.7; cursor: default; transform: none; }
+
+.form-footer-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--color-texto-suave);
+    margin: 18px 0 0;
+}
+.form-footer-link a { color: var(--color-primario); text-decoration: none; font-weight: 600; }
+.form-footer-link a:hover { text-decoration: underline; }
+
+/* ── Layout de formularios de varias secciones (reutilizado por
+   registro.html y los módulos de app.html: perfil, mascota) ────── */
+.seccion-titulo {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-texto-suave);
+    margin: 24px 0 12px;
+    border-bottom: 1px solid var(--color-borde);
+    padding-bottom: 6px;
+}
+.seccion-titulo:first-of-type { margin-top: 0; }
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+}
+@media (max-width: 560px) {
+    .grid-2 { grid-template-columns: 1fr; }
+}
+
+.field-ancho-completo { grid-column: 1 / -1; }
+
+/* ── Toasts (usados también por app.css/registro.css) ─────────── */
+.toast-contenedor {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.toast {
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    border: 1px solid var(--color-borde);
+    border-left: 4px solid var(--color-primario);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    box-shadow: var(--sombra-card);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    max-width: 320px;
+}
+.toast-visible { opacity: 1; transform: translateY(0); }
+.toast-error { border-left-color: var(--color-error); }
+.toast-exito { border-left-color: var(--color-exito); }

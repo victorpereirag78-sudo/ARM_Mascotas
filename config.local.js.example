@@ -1,0 +1,14 @@
+// ================================================================
+// CONFIG.LOCAL.JS.EXAMPLE — Plantilla de configuración local
+// Copiar como "config.local.js" (gitignored) y completar cuando
+// corresponda. Se carga DESPUÉS de config.js, así que solo debe
+// usarse para overrides opcionales — nunca para la URL/key públicas
+// de Supabase, esas van directas en config.js.
+//
+// Módulo de IA (no conectado todavía, ver "Roadmap" del proyecto):
+// cuando se elija un proveedor (OpenAI, Gemini, DeepSeek) su API key
+// se declara aquí para no subirla al repositorio.
+// ================================================================
+
+window.IA_PROVIDER_KEY = window.IA_PROVIDER_KEY || null;
+window.IA_PROVIDER_NOMBRE = window.IA_PROVIDER_NOMBRE || null; // 'openai' | 'gemini' | 'deepseek'

@@ -1,0 +1,30 @@
+/* ================================================================
+   MODULO-PERFIL.CSS
+   ================================================================ */
+
+.perfil-avatar-fila {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.perfil-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--color-primario);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 700;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.perfil-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.btn-subir-foto { cursor: pointer; }
+
+.btn-ancho-auto { width: auto; padding-left: 24px; padding-right: 24px; }
