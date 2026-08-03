@@ -21,6 +21,18 @@ const Auth = (() => {
             return { ok: false, error: 'Revisa tu correo para confirmar la cuenta antes de continuar.' };
         }
 
+        // Si el proyecto exige confirmación de correo, signUp() no entrega
+        // sesión activa todavía (el cliente sigue siendo "anon", sin permisos
+        // sobre mascotas_perfiles). Guardamos el resto del formulario y lo
+        // aplicamos en el primer login, cuando ya haya sesión autenticada.
+        if (!data.session) {
+            localStorage.setItem(
+                `armMascotas_perfilPendiente_${email}`,
+                JSON.stringify({ ...datosPerfil, correo: email })
+            );
+            return { ok: true, usuario: data.user, pendienteConfirmacion: true };
+        }
+
         const { error: errorPerfil } = await db
             .from('mascotas_perfiles')
             .update({ ...datosPerfil, correo: email })
@@ -60,6 +72,8 @@ const Auth = (() => {
         const { data: { user } } = await db.auth.getUser();
         if (!user) return { ok: false, error: 'Sesión no válida' };
 
+        await aplicarPerfilPendiente(user);
+
         const { data: perfil, error: errorPerfil } = await db
             .from('mascotas_perfiles')
             .select('*')
@@ -71,6 +85,17 @@ const Auth = (() => {
         window.appData.usuario = user;
         window.appData.perfil = perfil;
         return { ok: true, perfil };
+    }
+
+    // Completa el perfil con los datos guardados en registrarDueno() cuando
+    // el registro tuvo que esperar la confirmación de correo.
+    async function aplicarPerfilPendiente(user) {
+        const clave = `armMascotas_perfilPendiente_${user.email}`;
+        const pendiente = localStorage.getItem(clave);
+        if (!pendiente) return;
+
+        await db.from('mascotas_perfiles').update(JSON.parse(pendiente)).eq('id', user.id);
+        localStorage.removeItem(clave);
     }
 
     // ── Permisos de menú por rol ─────────────────────────────────

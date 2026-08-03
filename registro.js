@@ -57,6 +57,13 @@
             return;
         }
 
+        if (res.pendienteConfirmacion) {
+            mensajeGeneral.textContent = '¡Cuenta creada! Revisa tu correo y confirma tu cuenta para poder iniciar sesión.';
+            mensajeGeneral.className = 'field-msg msg-exito';
+            form.reset();
+            return;
+        }
+
         mensajeGeneral.textContent = '¡Cuenta creada! Redirigiendo...';
         mensajeGeneral.className = 'field-msg msg-exito';
         setTimeout(() => (window.location.href = '/app.html'), 900);
