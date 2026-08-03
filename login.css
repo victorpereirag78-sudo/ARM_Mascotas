@@ -164,6 +164,23 @@ body {
     font-family: inherit;
 }
 
+/* El navegador fuerza un fondo propio (blanco/amarillo) en campos con
+   autocompletado, ignorando el tema — se sobreescribe con el truco del
+   box-shadow interno para que respete los colores de la app. */
+.input-wrap input:-webkit-autofill,
+.input-wrap input:-webkit-autofill:hover,
+.input-wrap input:-webkit-autofill:focus,
+.input-wrap input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-texto);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-fondo) inset;
+    box-shadow: 0 0 0 1000px var(--color-fondo) inset;
+    transition: background-color 9999s ease-in-out 0s;
+}
+.input-wrap input:autofill {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
 .field-error {
     display: block;
     min-height: 16px;
