@@ -11,7 +11,7 @@
     const mensajeGeneral = document.getElementById('mensajeGeneral');
 
     Auth.restaurarSesion().then((res) => {
-        if (res.ok) window.location.href = 'app.html';
+        if (res.ok) window.location.href = '/app.html';
     });
 
     form.addEventListener('submit', async (ev) => {
@@ -59,7 +59,7 @@
 
         mensajeGeneral.textContent = '¡Cuenta creada! Redirigiendo...';
         mensajeGeneral.className = 'field-msg msg-exito';
-        setTimeout(() => (window.location.href = 'app.html'), 900);
+        setTimeout(() => (window.location.href = '/app.html'), 900);
     });
 
     function valor(id) {

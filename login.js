@@ -12,7 +12,7 @@
 
     // Si ya hay sesión activa, saltar directo a la app.
     Auth.restaurarSesion().then((res) => {
-        if (res.ok) window.location.href = 'app.html';
+        if (res.ok) window.location.href = '/app.html';
     });
 
     form.addEventListener('submit', async (ev) => {
@@ -47,7 +47,7 @@
             return;
         }
 
-        window.location.href = 'app.html';
+        window.location.href = '/app.html';
     });
 
     function mostrarError(idSpan, texto) {

@@ -13,7 +13,7 @@ const PANELES = [
 (async () => {
     const res = await Auth.restaurarSesion();
     if (!res.ok) {
-        window.location.href = 'index.html';
+        window.location.href = '/index.html';
         return;
     }
 
@@ -26,7 +26,7 @@ const PANELES = [
 
     document.getElementById('btnLogout').addEventListener('click', async () => {
         await Auth.logout();
-        window.location.href = 'index.html';
+        window.location.href = '/index.html';
     });
 
     const panelInicial = PANELES.find((p) => Auth.puedeAcceder(p.id)) || PANELES[0];
@@ -100,6 +100,6 @@ function cerrarSidebarMovil() {
 
 function registrarServiceWorker() {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
 }
