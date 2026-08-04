@@ -7,11 +7,41 @@
 
 const Dashboard = (() => {
 
+    let pendientesPorMascota = {};
+
     async function init(el) {
         el.innerHTML = `<div class="estado-vacio"><p>Cargando...</p></div>`;
         const mascotas = await Mascota.cargarMascotas();
+        pendientesPorMascota = await cargarPendientes(mascotas.map((m) => m.id));
         el.innerHTML = plantilla(mascotas);
         wireEventos(el);
+    }
+
+    async function cargarPendientes(idsMascotas) {
+        const resultado = {};
+        idsMascotas.forEach((id) => (resultado[id] = { proximaVacuna: null, proximaDesparasitacion: null, gastoAnio: 0 }));
+        if (!idsMascotas.length) return resultado;
+
+        const hoy = Utils.hoy();
+        const anioActual = new Date().getFullYear().toString();
+
+        const [{ data: vacunas }, { data: despara }, { data: gastos }] = await Promise.all([
+            db.from('mascotas_vacunas').select('mascota_id, proxima_dosis_fecha').in('mascota_id', idsMascotas).gte('proxima_dosis_fecha', hoy).order('proxima_dosis_fecha', { ascending: true }),
+            db.from('mascotas_desparasitaciones').select('mascota_id, proxima_aplicacion').in('mascota_id', idsMascotas).gte('proxima_aplicacion', hoy).order('proxima_aplicacion', { ascending: true }),
+            db.from('mascotas_gastos').select('mascota_id, monto, fecha').in('mascota_id', idsMascotas).gte('fecha', `${anioActual}-01-01`)
+        ]);
+
+        (vacunas || []).forEach((v) => {
+            if (!resultado[v.mascota_id].proximaVacuna) resultado[v.mascota_id].proximaVacuna = v.proxima_dosis_fecha;
+        });
+        (despara || []).forEach((d) => {
+            if (!resultado[d.mascota_id].proximaDesparasitacion) resultado[d.mascota_id].proximaDesparasitacion = d.proxima_aplicacion;
+        });
+        (gastos || []).forEach((g) => {
+            resultado[g.mascota_id].gastoAnio += Number(g.monto);
+        });
+
+        return resultado;
     }
 
     function plantilla(mascotas) {
@@ -37,6 +67,7 @@ const Dashboard = (() => {
         const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie);
         const dias = Utils.diasParaCumpleanos(m.fecha_nacimiento);
         const emojiEspecie = m.especie === 'perro' ? '🐶' : m.especie === 'gato' ? '🐱' : '🐾';
+        const pendientes = pendientesPorMascota[m.id] || { proximaVacuna: null, proximaDesparasitacion: null, gastoAnio: 0 };
 
         return `
             <div class="card dashboard-card" data-id="${m.id}">
@@ -72,8 +103,9 @@ const Dashboard = (() => {
                 </div>
 
                 <div class="dashboard-card-pendientes">
-                    <span class="pendiente-item">💉 Próxima vacuna: se activará en el módulo Clínico</span>
-                    <span class="pendiente-item">🗓️ Próximo control: se activará en el módulo Agenda</span>
+                    <span class="pendiente-item">💉 Próxima vacuna: ${textoPendiente(pendientes.proximaVacuna)}</span>
+                    <span class="pendiente-item">🐛 Próxima desparasitación: ${textoPendiente(pendientes.proximaDesparasitacion)}</span>
+                    <span class="pendiente-item">💰 Gastos ${new Date().getFullYear()}: $${pendientes.gastoAnio.toLocaleString('es-CL')}</span>
                 </div>
 
                 <button class="btn-secundario btn-ver-ficha" data-id="${m.id}">Ver ficha completa</button>
@@ -88,6 +120,10 @@ const Dashboard = (() => {
         el.querySelectorAll('.btn-ver-ficha').forEach((btn) => {
             btn.addEventListener('click', () => irAPanel('panel-mascotas'));
         });
+    }
+
+    function textoPendiente(fechaISO) {
+        return fechaISO ? Utils.formatearFecha(fechaISO) : 'Sin registro';
     }
 
     function capitalizar(s) {

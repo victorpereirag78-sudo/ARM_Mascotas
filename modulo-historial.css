@@ -1,0 +1,101 @@
+/* ================================================================
+   MODULO-HISTORIAL.CSS
+   ================================================================ */
+
+.historial-wrap { margin-top: 28px; }
+.historial-wrap-titulo { margin-bottom: 12px; }
+
+.historial-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+.historial-tab {
+    border: 1px solid var(--color-borde);
+    background: var(--color-superficie);
+    color: var(--color-texto-suave);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.historial-tab.activo { background: var(--color-primario); color: #fff; border-color: var(--color-primario); }
+
+.historial-panel { max-width: 760px; }
+
+.historial-form-card { margin-bottom: 20px; }
+.historial-form .field-group { margin-bottom: 14px; }
+.check-inline { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.check-inline input { width: auto; }
+
+.historial-lista { display: flex; flex-direction: column; }
+
+.historial-fila {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-borde);
+    flex-wrap: wrap;
+}
+.historial-fila:last-child { border-bottom: none; }
+
+.historial-fila-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 180px; }
+.historial-fila-info strong { font-size: 14px; }
+.historial-fila-sub { font-size: 12px; color: var(--color-texto-suave); }
+
+.historial-fila-estado { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.historial-fila-etiqueta { font-size: 11px; color: var(--color-texto-suave); }
+
+.historial-fila-acciones { display: flex; gap: 8px; margin-left: auto; }
+.historial-fila-acciones .btn-secundario { padding: 7px 12px; font-size: 12px; }
+
+/* ── Resumen / gráfico de gastos ─────────────────────────────── */
+.historial-resumen { margin-bottom: 20px; }
+.gasto-barras { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.gasto-barra-fila { display: grid; grid-template-columns: 100px 1fr 80px; align-items: center; gap: 10px; font-size: 12px; }
+.gasto-barra-track { height: 8px; background: var(--color-fondo); border-radius: 999px; overflow: hidden; }
+.gasto-barra-fill { height: 100%; background: var(--color-primario); border-radius: 999px; }
+.gasto-barra-monto { text-align: right; color: var(--color-texto-suave); }
+
+/* ── Gráfico de evolución ─────────────────────────────────────── */
+.historial-grafico { margin-bottom: 20px; }
+.grafico-svg { width: 100%; height: 120px; display: block; margin-top: 10px; }
+.grafico-rango { display: flex; justify-content: space-between; font-size: 11px; color: var(--color-texto-suave); margin-top: 4px; }
+
+/* ── Diario ───────────────────────────────────────────────────── */
+.diario-lista { display: flex; flex-direction: column; gap: 14px; }
+.diario-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    padding: 14px;
+    flex-wrap: wrap;
+}
+.diario-item-media { width: 96px; height: 96px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: var(--color-fondo); }
+.diario-item-media img, .diario-item-media video { width: 100%; height: 100%; object-fit: cover; }
+.diario-item-cuerpo { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 4px; }
+.diario-item-tipo { font-size: 11px; font-weight: 700; color: var(--color-primario); }
+.diario-item-cuerpo p { margin: 0; font-size: 13px; }
+.diario-item-fecha { font-size: 11px; color: var(--color-texto-suave); }
+
+/* ── Línea de vida ────────────────────────────────────────────── */
+.linea-lista { display: flex; flex-direction: column; }
+.linea-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-borde);
+}
+.linea-item:last-child { border-bottom: none; }
+.linea-icono { font-size: 20px; flex-shrink: 0; }
+.linea-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.linea-descripcion { font-size: 12px; color: var(--color-texto-suave); }
+.linea-fecha { font-size: 11px; color: var(--color-texto-suave); }

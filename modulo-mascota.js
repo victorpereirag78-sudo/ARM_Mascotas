@@ -183,6 +183,13 @@ const Mascota = (() => {
                         ${esEdicion ? `<button type="button" class="btn-peligro" id="btnEliminarMascota">Eliminar mascota</button>` : ''}
                     </div>
                 </form>
+
+                ${esEdicion ? `
+                    <div class="historial-wrap">
+                        <h3 class="seccion-titulo historial-wrap-titulo">Historia de vida</h3>
+                        <div id="historialContenedor"></div>
+                    </div>
+                ` : ''}
             </div>
         `;
     }
@@ -219,6 +226,11 @@ const Mascota = (() => {
 
         const btnEliminar = document.getElementById('btnEliminarMascota');
         if (btnEliminar) btnEliminar.addEventListener('click', eliminar);
+
+        const historialContenedor = document.getElementById('historialContenedor');
+        if (historialContenedor && editando) {
+            Historial.init(historialContenedor, editando.id);
+        }
     }
 
     function actualizarEdadEnVivo() {
