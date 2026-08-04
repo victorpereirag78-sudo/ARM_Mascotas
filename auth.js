@@ -18,7 +18,7 @@ const Auth = (() => {
         });
         if (error) return { ok: false, error: error.message };
         if (!data.user) {
-            return { ok: false, error: 'Revisa tu correo para confirmar la cuenta antes de continuar.' };
+            return { ok: false, error: 'Revisa tu correo para confirmar la cuenta antes de continuar. Tambien revisa tu carpeta de NO DESEADOS' };
         }
 
         // Si el proyecto exige confirmación de correo, signUp() no entrega
