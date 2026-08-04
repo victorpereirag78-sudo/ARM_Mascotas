@@ -1,0 +1,21 @@
+/* ================================================================
+   MODULO-AGENDA.CSS
+   ================================================================ */
+
+.agenda-lista { display: flex; flex-direction: column; max-width: 760px; }
+
+.agenda-fila {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-borde);
+    flex-wrap: wrap;
+}
+.agenda-fila:last-child { border-bottom: none; }
+.agenda-fila-icono { font-size: 20px; flex-shrink: 0; }
+.agenda-fila-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 180px; }
+.agenda-fila-info strong { font-size: 14px; }
+.agenda-fila-sub { font-size: 12px; color: var(--color-texto-suave); }
+.agenda-fila-acciones { display: flex; gap: 8px; }
+.agenda-fila-acciones .btn-secundario { padding: 7px 12px; font-size: 12px; }

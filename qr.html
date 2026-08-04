@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0ea5a1">
+    <title>Ficha de emergencia — ARM Mascotas</title>
+    <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/login.css">
+    <link rel="stylesheet" href="/qr-publico.css">
+</head>
+<body>
+
+    <button id="btnTema" class="btn-tema" type="button" aria-label="Cambiar tema" title="Cambiar tema">🌙</button>
+
+    <main class="sos-publico-wrap">
+        <div id="sosContenido" class="sos-publico-card">
+            <p>Cargando ficha de emergencia...</p>
+        </div>
+        <p class="sos-publico-marca">🐾 ARM Mascotas</p>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config.js"></script>
+    <script src="/config.local.js" onerror="this.remove()"></script>
+    <script src="/utils.js"></script>
+    <script src="/qr.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@
 const PANELES = [
     { id: 'panel-dashboard', icono: '🏠', etiqueta: 'Dashboard', modulo: () => window.Dashboard },
     { id: 'panel-mascotas', icono: '🐾', etiqueta: 'Mis mascotas', modulo: () => window.Mascota },
+    { id: 'panel-agenda', icono: '🗓️', etiqueta: 'Agenda', modulo: () => window.Agenda },
     { id: 'panel-perfil', icono: '👤', etiqueta: 'Mi perfil', modulo: () => window.Perfil },
     { id: 'panel-compartir', icono: '🤝', etiqueta: 'Compartir', modulo: () => window.Compartir },
     { id: 'panel-admin', icono: '🛡️', etiqueta: 'Administración', modulo: () => window.Admin }

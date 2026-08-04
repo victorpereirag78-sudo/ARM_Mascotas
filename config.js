@@ -27,6 +27,7 @@ const ROL_MODULOS = {
     'dueno': [
         'panel-dashboard',
         'panel-mascotas',
+        'panel-agenda',
         'panel-perfil',
         'panel-compartir'
     ],

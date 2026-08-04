@@ -186,6 +186,10 @@ const Mascota = (() => {
 
                 ${esEdicion ? `
                     <div class="historial-wrap">
+                        <h3 class="seccion-titulo historial-wrap-titulo">SOS y código QR</h3>
+                        <div id="qrContenedor"></div>
+                    </div>
+                    <div class="historial-wrap">
                         <h3 class="seccion-titulo historial-wrap-titulo">Historia de vida</h3>
                         <div id="historialContenedor"></div>
                     </div>
@@ -230,6 +234,11 @@ const Mascota = (() => {
         const historialContenedor = document.getElementById('historialContenedor');
         if (historialContenedor && editando) {
             Historial.init(historialContenedor, editando.id);
+        }
+
+        const qrContenedor = document.getElementById('qrContenedor');
+        if (qrContenedor && editando) {
+            QR.init(qrContenedor, editando);
         }
     }
 

@@ -2,7 +2,8 @@
    MODULO-DASHBOARD.CSS
    ================================================================ */
 
-.dashboard-saludo { margin: 0 0 20px; font-size: 20px; }
+.dashboard-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.dashboard-saludo { margin: 0; font-size: 20px; }
 
 .dashboard-grid {
     display: grid;

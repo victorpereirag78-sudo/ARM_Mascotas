@@ -1,0 +1,57 @@
+/* ================================================================
+   QR-PUBLICO.CSS — Ficha pública de emergencia (qr.html)
+   ================================================================ */
+
+body { background: var(--color-fondo); }
+
+.sos-publico-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 18px;
+}
+
+.sos-publico-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+}
+
+.sos-publico-foto {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--color-fondo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 16px;
+    overflow: hidden;
+}
+.sos-publico-foto img { width: 100%; height: 100%; object-fit: cover; }
+
+.sos-publico-nombre { margin: 0 0 4px; font-size: 24px; }
+.sos-publico-sub { margin: 0 0 24px; color: var(--color-texto-suave); font-size: 14px; }
+
+.sos-publico-fila {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    padding: 12px 0;
+    border-top: 1px solid var(--color-borde);
+}
+.sos-publico-etiqueta { font-size: 11px; font-weight: 700; color: var(--color-texto-suave); text-transform: uppercase; letter-spacing: 0.03em; }
+.sos-publico-valor { font-size: 14px; }
+
+.sos-publico-nota { margin: 20px 0 0; font-size: 12px; color: var(--color-texto-suave); }
+
+.sos-publico-marca { font-size: 13px; color: var(--color-texto-suave); font-weight: 600; }

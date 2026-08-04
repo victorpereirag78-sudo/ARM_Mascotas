@@ -1,0 +1,27 @@
+/* ================================================================
+   MODULO-QR.CSS — Ficha SOS y código QR
+   ================================================================ */
+
+.sos-card { margin-bottom: 20px; max-width: 760px; }
+.sos-datos { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.sos-item { display: flex; flex-direction: column; gap: 2px; }
+.sos-etiqueta { font-size: 11px; color: var(--color-texto-suave); font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; }
+
+.qr-card { max-width: 760px; }
+.qr-descripcion { color: var(--color-texto-suave); font-size: 13px; margin: 0 0 16px; }
+
+.qr-contenido { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+.qr-imagen { width: 140px; height: 140px; border-radius: 12px; border: 1px solid var(--color-borde); background: #fff; padding: 6px; }
+.qr-acciones { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+.qr-link-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--color-borde);
+    background: var(--color-fondo);
+    color: var(--color-texto-suave);
+    font-size: 12px;
+}
+
+.qr-visibilidad { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 18px; }
+.qr-check { font-size: 13px; }

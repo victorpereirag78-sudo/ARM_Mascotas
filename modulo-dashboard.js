@@ -46,7 +46,12 @@ const Dashboard = (() => {
 
     function plantilla(mascotas) {
         const nombre = window.appData.perfil?.nombre || '';
-        const saludo = `<h2 class="dashboard-saludo">Hola${nombre ? ', ' + esc(nombre) : ''} 👋</h2>`;
+        const saludo = `
+            <div class="dashboard-cabecera">
+                <h2 class="dashboard-saludo">Hola${nombre ? ', ' + esc(nombre) : ''} 👋</h2>
+                <button class="btn-secundario" id="btnIrAgenda">🗓️ Ver agenda completa</button>
+            </div>
+        `;
 
         if (!mascotas.length) {
             return `
@@ -116,6 +121,9 @@ const Dashboard = (() => {
     function wireEventos(el) {
         const btnIr = el.querySelector('#btnIrAMascotas');
         if (btnIr) btnIr.addEventListener('click', () => irAPanel('panel-mascotas'));
+
+        const btnAgenda = el.querySelector('#btnIrAgenda');
+        if (btnAgenda) btnAgenda.addEventListener('click', () => irAPanel('panel-agenda'));
 
         el.querySelectorAll('.btn-ver-ficha').forEach((btn) => {
             btn.addEventListener('click', () => irAPanel('panel-mascotas'));
