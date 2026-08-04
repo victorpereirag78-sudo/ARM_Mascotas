@@ -13,10 +13,20 @@
     <link rel="stylesheet" href="/modulo-perfil.css">
     <link rel="stylesheet" href="/modulo-mascota.css">
     <link rel="stylesheet" href="/modulo-compartir.css">
+    <link rel="stylesheet" href="/modulo-admin.css">
 </head>
 <body>
 
-    <div class="app-shell">
+    <div class="cuenta-bloqueada" id="cuentaBloqueada" hidden>
+        <div class="cuenta-bloqueada-card">
+            <span class="cuenta-bloqueada-icono" id="cbIcono">🐾</span>
+            <h2 id="cbTitulo"></h2>
+            <p id="cbMensaje"></p>
+            <button class="btn-secundario" id="btnLogoutBloqueado">↩ Salir</button>
+        </div>
+    </div>
+
+    <div class="app-shell" id="appShell">
 
         <!-- ── Sidebar (escritorio) ─────────────────────────────── -->
         <aside class="sidebar" id="sidebar">
@@ -54,6 +64,8 @@
 
                 <section class="panel" id="panel-compartir" data-titulo="Compartir" hidden></section>
 
+                <section class="panel" id="panel-admin" data-titulo="Administración" hidden></section>
+
             </main>
         </div>
 
@@ -74,6 +86,7 @@
     <script src="/modulo-perfil.js"></script>
     <script src="/modulo-mascota.js"></script>
     <script src="/modulo-compartir.js"></script>
+    <script src="/modulo-admin.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>

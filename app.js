@@ -7,13 +7,37 @@ const PANELES = [
     { id: 'panel-dashboard', icono: '🏠', etiqueta: 'Dashboard', modulo: () => window.Dashboard },
     { id: 'panel-mascotas', icono: '🐾', etiqueta: 'Mis mascotas', modulo: () => window.Mascota },
     { id: 'panel-perfil', icono: '👤', etiqueta: 'Mi perfil', modulo: () => window.Perfil },
-    { id: 'panel-compartir', icono: '🤝', etiqueta: 'Compartir', modulo: () => window.Compartir }
+    { id: 'panel-compartir', icono: '🤝', etiqueta: 'Compartir', modulo: () => window.Compartir },
+    { id: 'panel-admin', icono: '🛡️', etiqueta: 'Administración', modulo: () => window.Admin }
 ];
+
+const MENSAJES_CUENTA_BLOQUEADA = {
+    pendiente: {
+        icono: '⏳',
+        titulo: 'Tu cuenta está en revisión',
+        mensaje: 'Un administrador debe aprobar tu registro antes de que puedas usar ARM Mascotas. Te avisaremos por correo apenas esté lista.'
+    },
+    rechazado: {
+        icono: '🚫',
+        titulo: 'Solicitud de acceso rechazada',
+        mensaje: 'Tu registro no fue aprobado. Si crees que es un error, contacta al administrador que te compartió el acceso.'
+    },
+    suspendido: {
+        icono: '⛔',
+        titulo: 'Cuenta suspendida',
+        mensaje: 'Tu acceso a ARM Mascotas fue suspendido. Contacta al administrador que te compartió el acceso para más información.'
+    }
+};
 
 (async () => {
     const res = await Auth.restaurarSesion();
     if (!res.ok) {
         window.location.href = '/index.html';
+        return;
+    }
+
+    if (window.appData.perfil.estado_cuenta !== 'aprobado') {
+        mostrarCuentaBloqueada(window.appData.perfil.estado_cuenta);
         return;
     }
 
@@ -34,6 +58,23 @@ const PANELES = [
 
     registrarServiceWorker();
 })();
+
+function mostrarCuentaBloqueada(estado) {
+    document.getElementById('appShell').hidden = true;
+
+    const info = MENSAJES_CUENTA_BLOQUEADA[estado] || MENSAJES_CUENTA_BLOQUEADA.pendiente;
+    document.getElementById('cbIcono').textContent = info.icono;
+    document.getElementById('cbTitulo').textContent = info.titulo;
+    document.getElementById('cbMensaje').textContent = info.mensaje;
+
+    const overlay = document.getElementById('cuentaBloqueada');
+    overlay.hidden = false;
+
+    document.getElementById('btnLogoutBloqueado').addEventListener('click', async () => {
+        await Auth.logout();
+        window.location.href = '/index.html';
+    });
+}
 
 function panelesVisibles() {
     return PANELES.filter((p) => Auth.puedeAcceder(p.id));

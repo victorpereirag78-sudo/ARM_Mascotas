@@ -37,7 +37,7 @@ const ROL_MODULOS = {
         // Reservado — Módulo Clínica (futuro)
     ],
     'admin': [
-        // Reservado — Módulo Administrador ARM (futuro)
+        'panel-admin'
     ]
 };
 

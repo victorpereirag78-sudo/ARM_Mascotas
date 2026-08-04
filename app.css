@@ -5,6 +5,26 @@
 
 body { background: var(--color-fondo); }
 
+/* ── Pantalla de cuenta bloqueada (pendiente / rechazada / suspendida) ─ */
+.cuenta-bloqueada {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.cuenta-bloqueada-card {
+    max-width: 420px;
+    text-align: center;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    padding: 40px 28px;
+}
+.cuenta-bloqueada-icono { font-size: 44px; display: block; margin-bottom: 16px; }
+.cuenta-bloqueada-card h2 { margin: 0 0 10px; font-size: 19px; }
+.cuenta-bloqueada-card p { margin: 0 0 24px; color: var(--color-texto-suave); font-size: 14px; line-height: 1.5; }
+
 .app-shell {
     display: grid;
     grid-template-columns: 260px 1fr;
