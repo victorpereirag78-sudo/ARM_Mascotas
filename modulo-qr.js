@@ -90,6 +90,7 @@ const QR = (() => {
                     ${checkboxVisibilidad('mostrar_veterinario', 'Veterinario habitual', visibilidad)}
                     ${checkboxVisibilidad('mostrar_telefono_dueno', 'Mi teléfono', visibilidad)}
                     ${checkboxVisibilidad('mostrar_contacto_emergencia', 'Contacto de emergencia', visibilidad)}
+                    ${checkboxVisibilidad('mostrar_observaciones', 'Condiciones especiales (observaciones)', visibilidad)}
                 </div>
                 <button type="button" class="btn-primario btn-ancho-auto" id="btnGuardarVisibilidad">Guardar visibilidad</button>
                 <div class="field-msg" id="qrMensaje"></div>

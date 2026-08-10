@@ -15,12 +15,29 @@
     <link rel="stylesheet" href="/modulo-historial.css">
     <link rel="stylesheet" href="/modulo-qr.css">
     <link rel="stylesheet" href="/modulo-autorizacion-vet.css">
+    <link rel="stylesheet" href="/modulo-perdida.css">
+    <link rel="stylesheet" href="/modulo-pasaporte.css">
     <link rel="stylesheet" href="/modulo-agenda.css">
     <link rel="stylesheet" href="/modulo-compartir.css">
     <link rel="stylesheet" href="/modulo-veterinario.css">
     <link rel="stylesheet" href="/modulo-admin.css">
+    <link rel="stylesheet" href="/modulo-emergencia.css">
 </head>
 <body>
+
+    <div class="emergencia-overlay" id="emergenciaOverlay" hidden>
+        <div class="emergencia-card">
+            <button class="btn-cerrar-emergencia" id="btnCerrarEmergencia" aria-label="Cerrar">✕</button>
+            <span class="emergencia-icono">🚨</span>
+            <h2>Emergencia Veterinaria</h2>
+            <p class="emergencia-aviso">Si tu mascota presenta una emergencia grave, busca atención veterinaria inmediatamente. Esta función no realiza diagnósticos.</p>
+            <div class="emergencia-acciones">
+                <button class="btn-primario" id="btnBuscarVetCercana">📍 Buscar veterinarias de urgencia cerca de mí</button>
+                <button class="btn-secundario" id="btnCompartirUbicacion">📤 Compartir mi ubicación</button>
+            </div>
+            <p class="field-msg" id="emergenciaMensaje"></p>
+        </div>
+    </div>
 
     <div class="cuenta-bloqueada" id="cuentaBloqueada" hidden>
         <div class="cuenta-bloqueada-card">
@@ -96,11 +113,14 @@
     <script src="/modulo-historial.js"></script>
     <script src="/modulo-qr.js"></script>
     <script src="/modulo-autorizacion-vet.js"></script>
+    <script src="/modulo-perdida.js"></script>
+    <script src="/modulo-pasaporte.js"></script>
     <script src="/modulo-mascota.js"></script>
     <script src="/modulo-agenda.js"></script>
     <script src="/modulo-compartir.js"></script>
     <script src="/modulo-veterinario.js"></script>
     <script src="/modulo-admin.js"></script>
+    <script src="/modulo-emergencia.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>

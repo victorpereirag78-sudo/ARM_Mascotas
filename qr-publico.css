@@ -39,7 +39,33 @@ body { background: var(--color-fondo); }
 .sos-publico-foto img { width: 100%; height: 100%; object-fit: cover; }
 
 .sos-publico-nombre { margin: 0 0 4px; font-size: 24px; }
-.sos-publico-sub { margin: 0 0 24px; color: var(--color-texto-suave); font-size: 14px; }
+.sos-publico-sub { margin: 0 0 8px; color: var(--color-texto-suave); font-size: 14px; }
+.sos-publico-tiene-dueno { margin: 0 0 20px; font-size: 13px; font-weight: 600; color: var(--color-texto-suave); }
+
+.sos-publico-banner-perdida {
+    background: var(--color-error);
+    color: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.sos-publico-banner-perdida strong { display: block; font-size: 16px; margin-bottom: 6px; }
+.sos-publico-banner-perdida p { margin: 4px 0; font-size: 13px; opacity: 0.95; }
+.sos-publico-fecha-perdida { font-style: italic; }
+
+.sos-publico-contactar { display: flex; gap: 10px; margin-bottom: 20px; }
+.sos-publico-contactar a {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+}
+.sos-publico-contactar .btn-primario { background: var(--color-primario); color: #fff; }
+.sos-publico-contactar .btn-secundario { background: #25d366; color: #fff; }
 
 .sos-publico-fila {
     display: flex;

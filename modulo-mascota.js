@@ -190,6 +190,14 @@ const Mascota = (() => {
                         <div id="qrContenedor"></div>
                     </div>
                     <div class="historial-wrap">
+                        <h3 class="seccion-titulo historial-wrap-titulo">Mascota perdida</h3>
+                        <div id="perdidaContenedor"></div>
+                    </div>
+                    <div class="historial-wrap">
+                        <h3 class="seccion-titulo historial-wrap-titulo">🐾 Pasaporte Digital</h3>
+                        <div id="pasaporteContenedor"></div>
+                    </div>
+                    <div class="historial-wrap">
                         <h3 class="seccion-titulo historial-wrap-titulo">Veterinarios autorizados</h3>
                         <div id="autorizacionVetContenedor"></div>
                     </div>
@@ -243,6 +251,16 @@ const Mascota = (() => {
         const qrContenedor = document.getElementById('qrContenedor');
         if (qrContenedor && editando) {
             QR.init(qrContenedor, editando);
+        }
+
+        const perdidaContenedor = document.getElementById('perdidaContenedor');
+        if (perdidaContenedor && editando) {
+            Perdida.init(perdidaContenedor, editando);
+        }
+
+        const pasaporteContenedor = document.getElementById('pasaporteContenedor');
+        if (pasaporteContenedor && editando) {
+            Pasaporte.init(pasaporteContenedor, editando);
         }
 
         const autorizacionVetContenedor = document.getElementById('autorizacionVetContenedor');

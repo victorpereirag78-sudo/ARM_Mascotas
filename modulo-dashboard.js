@@ -49,7 +49,10 @@ const Dashboard = (() => {
         const saludo = `
             <div class="dashboard-cabecera">
                 <h2 class="dashboard-saludo">Hola${nombre ? ', ' + esc(nombre) : ''} 👋</h2>
-                <button class="btn-secundario" id="btnIrAgenda">🗓️ Ver agenda completa</button>
+                <div class="dashboard-cabecera-acciones">
+                    <button class="btn-emergencia-dashboard" id="btnEmergencia">🚨 Emergencia Veterinaria</button>
+                    <button class="btn-secundario" id="btnIrAgenda">🗓️ Ver agenda completa</button>
+                </div>
             </div>
         `;
 
@@ -124,6 +127,9 @@ const Dashboard = (() => {
 
         const btnAgenda = el.querySelector('#btnIrAgenda');
         if (btnAgenda) btnAgenda.addEventListener('click', () => irAPanel('panel-agenda'));
+
+        const btnEmergencia = el.querySelector('#btnEmergencia');
+        if (btnEmergencia) btnEmergencia.addEventListener('click', () => Emergencia.abrir());
 
         el.querySelectorAll('.btn-ver-ficha').forEach((btn) => {
             btn.addEventListener('click', () => irAPanel('panel-mascotas'));

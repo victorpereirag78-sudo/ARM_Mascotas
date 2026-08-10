@@ -1,0 +1,18 @@
+/* ================================================================
+   MODULO-PERDIDA.CSS
+   ================================================================ */
+
+.perdida-card { max-width: 640px; }
+.perdida-estado-ok { font-weight: 600; margin: 0 0 16px; }
+.perdida-estado-activa { font-weight: 700; color: var(--color-error); margin: 0 0 12px; font-size: 15px; }
+.perdida-card-activa { border-color: var(--color-error); }
+
+.perdida-detalle { margin: 0 0 8px; font-size: 13px; }
+.perdida-detalle a { color: var(--color-primario); }
+
+.perdida-form { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--color-borde); }
+.perdida-ubicacion-estado { font-size: 12px; color: var(--color-texto-suave); margin-left: 10px; }
+
+.perdida-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+
+#btnMarcarEncontrada { margin-top: 14px; }
