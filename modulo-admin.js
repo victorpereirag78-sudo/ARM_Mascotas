@@ -9,6 +9,7 @@ const Admin = (() => {
     let contenedorActual = null;
     let perfiles = [];
     let filtro = 'pendiente';
+    let formVeterinarioAbierto = null; // id de perfil con el form de "convertir en veterinario" abierto
 
     const ETIQUETAS_ESTADO = {
         pendiente: 'Pendiente',
@@ -72,6 +73,7 @@ const Admin = (() => {
         const esUnoMismo = p.id === window.appData.usuario.id;
         const nombreCompleto = `${p.nombre || ''} ${p.apellido || ''}`.trim() || p.correo;
         const ubicacion = [p.ciudad, p.region, p.pais].filter(Boolean).join(', ');
+        const puedeConvertirVet = !esUnoMismo && p.estado_cuenta === 'aprobado' && p.rol === 'dueno';
 
         return `
             <div class="admin-fila" data-id="${p.id}">
@@ -79,15 +81,36 @@ const Admin = (() => {
                     <strong>${esc(nombreCompleto)}</strong>
                     <span class="admin-fila-correo">${esc(p.correo)}</span>
                     ${ubicacion ? `<span class="admin-fila-ubicacion">${esc(ubicacion)}</span>` : ''}
-                    <span class="admin-fila-fecha">Registrado: ${Utils.formatearFecha((p.created_at || '').slice(0, 10))}</span>
+                    <span class="admin-fila-fecha">Registrado: ${Utils.formatearFecha((p.created_at || '').slice(0, 10))} · Rol: ${etiquetaRol(p.rol)}</span>
                 </div>
                 <span class="badge-estado badge-${p.estado_cuenta}">${ETIQUETAS_ESTADO[p.estado_cuenta] || p.estado_cuenta}</span>
                 <div class="admin-fila-acciones">
                     ${esUnoMismo ? '<span class="admin-fila-tu">(tú)</span>' : accionesPara(p)}
+                    ${puedeConvertirVet ? `<button class="btn-secundario btn-toggle-vet" data-id="${p.id}">Convertir en veterinario</button>` : ''}
                     <button class="btn-secundario btn-enviar-reset" data-correo="${esc(p.correo)}">Enviar reset de contraseña</button>
                 </div>
             </div>
+            ${formVeterinarioAbierto === p.id ? formConvertirVet(p) : ''}
         `;
+    }
+
+    function formConvertirVet(p) {
+        return `
+            <div class="card admin-form-vet" data-id="${p.id}">
+                <h4 class="seccion-titulo">Datos profesionales de ${esc(p.nombre) || 'este usuario'}</h4>
+                <form id="formVeterinario" data-id="${p.id}" class="grid-2" novalidate>
+                    <div class="field-group"><label>N° de colegiatura</label><div class="input-wrap"><input type="text" id="vetColegiatura"></div></div>
+                    <div class="field-group"><label>Especialidad</label><div class="input-wrap"><input type="text" id="vetEspecialidad" placeholder="Ej: Medicina general"></div></div>
+                    <div class="field-group field-ancho-completo"><label>Teléfono</label><div class="input-wrap"><input type="text" id="vetTelefono" value="${esc(p.telefono)}"></div></div>
+                    <div class="field-msg field-ancho-completo" id="vetAdminMensaje"></div>
+                    <button type="submit" class="btn-primario btn-ancho-auto field-ancho-completo">Crear perfil de veterinario</button>
+                </form>
+            </div>
+        `;
+    }
+
+    function etiquetaRol(rol) {
+        return { dueno: 'Dueño', veterinario: 'Veterinario', clinica: 'Clínica', admin: 'Admin' }[rol] || rol;
     }
 
     function accionesPara(p) {
@@ -122,6 +145,66 @@ const Admin = (() => {
         document.querySelectorAll('.btn-enviar-reset').forEach((btn) => {
             btn.addEventListener('click', () => enviarReset(btn));
         });
+
+        document.querySelectorAll('.btn-toggle-vet').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                formVeterinarioAbierto = formVeterinarioAbierto === btn.dataset.id ? null : btn.dataset.id;
+                render();
+            });
+        });
+
+        const formVet = document.getElementById('formVeterinario');
+        if (formVet) formVet.addEventListener('submit', convertirEnVeterinario);
+    }
+
+    async function convertirEnVeterinario(ev) {
+        ev.preventDefault();
+        const perfilId = ev.target.dataset.id;
+        const perfil = perfiles.find((p) => p.id === perfilId);
+        const mensaje = document.getElementById('vetAdminMensaje');
+        const btn = ev.target.querySelector('button[type="submit"]');
+
+        Utils.setLoading(btn, true);
+
+        const { error: errorRol } = await db
+            .from('mascotas_perfiles')
+            .update({ rol: 'veterinario' })
+            .eq('id', perfilId);
+
+        if (errorRol) {
+            Utils.setLoading(btn, false);
+            mensaje.textContent = errorRol.message;
+            mensaje.className = 'field-msg msg-error field-ancho-completo';
+            return;
+        }
+
+        const { error: errorVet } = await db.from('mascotas_veterinarios').insert({
+            perfil_id: perfilId,
+            nombre: perfil.nombre || '',
+            apellido: perfil.apellido,
+            numero_colegiatura: valor('vetColegiatura'),
+            especialidad: valor('vetEspecialidad'),
+            telefono: valor('vetTelefono'),
+            correo: perfil.correo
+        });
+
+        Utils.setLoading(btn, false);
+
+        if (errorVet) {
+            mensaje.textContent = errorVet.message;
+            mensaje.className = 'field-msg msg-error field-ancho-completo';
+            return;
+        }
+
+        Utils.toast(`${perfil.correo} ahora es veterinario`, 'exito');
+        formVeterinarioAbierto = null;
+        await cargarPerfiles();
+        render();
+    }
+
+    function valor(id) {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() || null : null;
     }
 
     async function enviarReset(btn) {

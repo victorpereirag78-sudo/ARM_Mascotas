@@ -1,0 +1,21 @@
+/* ================================================================
+   MODULO-VETERINARIO.CSS
+   ================================================================ */
+
+.vet-mascota-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+}
+.vet-mascota-foto { border-radius: var(--radio); }
+.vet-mascota-info h3 { margin: 0 0 2px; font-size: 16px; }
+.vet-mascota-dueno { font-size: 12px; color: var(--color-texto-suave); margin: 6px 0; }
+
+.vet-detalle-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0 24px;
+}
+.vet-detalle-cabecera h2 { margin: 0 0 4px; }

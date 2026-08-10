@@ -190,6 +190,10 @@ const Mascota = (() => {
                         <div id="qrContenedor"></div>
                     </div>
                     <div class="historial-wrap">
+                        <h3 class="seccion-titulo historial-wrap-titulo">Veterinarios autorizados</h3>
+                        <div id="autorizacionVetContenedor"></div>
+                    </div>
+                    <div class="historial-wrap">
                         <h3 class="seccion-titulo historial-wrap-titulo">Historia de vida</h3>
                         <div id="historialContenedor"></div>
                     </div>
@@ -239,6 +243,11 @@ const Mascota = (() => {
         const qrContenedor = document.getElementById('qrContenedor');
         if (qrContenedor && editando) {
             QR.init(qrContenedor, editando);
+        }
+
+        const autorizacionVetContenedor = document.getElementById('autorizacionVetContenedor');
+        if (autorizacionVetContenedor && editando) {
+            AutorizacionVet.init(autorizacionVetContenedor, editando.id);
         }
     }
 

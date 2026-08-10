@@ -44,6 +44,8 @@
 .admin-fila-acciones .btn-secundario { padding: 8px 14px; font-size: 13px; }
 .admin-fila-tu { font-size: 12px; color: var(--color-texto-suave); font-style: italic; }
 
+.admin-form-vet { margin: -4px 0 14px; max-width: 640px; }
+
 .badge-aprobado { background: rgba(47, 158, 88, 0.15); color: var(--color-exito); }
 .badge-rechazado { background: rgba(214, 69, 69, 0.15); color: var(--color-error); }
 .badge-suspendido { background: rgba(107, 101, 96, 0.15); color: var(--color-texto-suave); }

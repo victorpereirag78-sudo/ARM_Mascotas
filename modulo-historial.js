@@ -3,14 +3,18 @@
 // Depende de: config.js, utils.js, auth.js
 // Se monta dentro de la ficha de la mascota (modulo-mascota.js) vía
 // Historial.init(el, mascotaId). Expone window.Historial.
-// Pestañas: Vacunas, Medicamentos, Desparasitación, Alimentación,
-// Evolución, Diario, Gastos y Línea de vida (auto + manual).
+// Pestañas: Consultas, Vacunas, Cirugías, Diagnósticos, Medicamentos,
+// Desparasitación, Alimentación, Evolución, Diario, Gastos y Línea de
+// vida (auto + manual).
 // ================================================================
 
 const Historial = (() => {
 
     const TABS = [
+        { id: 'consultas', etiqueta: '🩺 Consultas' },
         { id: 'vacunas', etiqueta: '💉 Vacunas' },
+        { id: 'cirugias', etiqueta: '🔪 Cirugías' },
+        { id: 'diagnosticos', etiqueta: '📋 Diagnósticos' },
         { id: 'medicamentos', etiqueta: '💊 Medicamentos' },
         { id: 'desparasitacion', etiqueta: '🐛 Desparasitación' },
         { id: 'alimentacion', etiqueta: '🍖 Alimentación' },
@@ -48,8 +52,11 @@ const Historial = (() => {
     }
 
     async function cargarTodo() {
-        const [vacunas, medicamentos, desparasitacion, alimentacion, evolucion, diario, gastos, linea] = await Promise.all([
+        const [consultas, vacunas, cirugias, diagnosticos, medicamentos, desparasitacion, alimentacion, evolucion, diario, gastos, linea] = await Promise.all([
+            consultar('mascotas_consultas', 'fecha', false),
             consultar('mascotas_vacunas', 'fecha', false),
+            consultar('mascotas_cirugias', 'fecha', false),
+            consultar('mascotas_diagnosticos', 'fecha', false),
             consultar('mascotas_medicamentos', 'created_at', false),
             consultar('mascotas_desparasitaciones', 'fecha', false),
             consultar('mascotas_alimentacion_historial', 'vigente_desde', false),
@@ -69,7 +76,10 @@ const Historial = (() => {
             administraciones = data || [];
         }
 
-        datos = { vacunas, medicamentos, desparasitacion, alimentacion, evolucion, diario, gastos, linea, administraciones };
+        datos = {
+            consultas, vacunas, cirugias, diagnosticos, medicamentos, desparasitacion,
+            alimentacion, evolucion, diario, gastos, linea, administraciones
+        };
     }
 
     async function consultar(tabla, orden, ascendente) {
@@ -99,7 +109,10 @@ const Historial = (() => {
 
     function renderTab(tab) {
         switch (tab) {
+            case 'consultas': return tabConsultas();
             case 'vacunas': return tabVacunas();
+            case 'cirugias': return tabCirugias();
+            case 'diagnosticos': return tabDiagnosticos();
             case 'medicamentos': return tabMedicamentos();
             case 'desparasitacion': return tabDesparasitacion();
             case 'alimentacion': return tabAlimentacion();
@@ -125,6 +138,140 @@ const Historial = (() => {
 
     function plantillaVacia(texto) {
         return `<div class="estado-vacio"><span class="estado-vacio-icono">🐾</span><p>${texto}</p></div>`;
+    }
+
+    // ── Consultas ────────────────────────────────────────────────
+    function tabConsultas() {
+        const lista = datos.consultas;
+        const filas = lista.map((c) => `
+            <div class="historial-fila">
+                <div class="historial-fila-info">
+                    <strong>${esc(c.motivo) || 'Consulta'}</strong>
+                    <span class="historial-fila-sub">${formatearFechaHora(c.fecha)}</span>
+                    ${c.diagnostico ? `<span class="historial-fila-sub">Diagnóstico: ${esc(c.diagnostico)}</span>` : ''}
+                    ${c.tratamiento ? `<span class="historial-fila-sub">Tratamiento: ${esc(c.tratamiento)}</span>` : ''}
+                    ${c.observaciones ? `<span class="historial-fila-sub">Obs: ${esc(c.observaciones)}</span>` : ''}
+                </div>
+                <button class="btn-peligro btn-historial-eliminar" data-tabla="mascotas_consultas" data-id="${c.id}">Eliminar</button>
+            </div>
+        `).join('');
+
+        return `
+            ${formularioTab('consultas', 'Registrar consulta', `
+                <div class="field-group"><label>Fecha *</label><div class="input-wrap"><input type="date" id="hConFecha" value="${Utils.hoy()}" required></div></div>
+                <div class="field-group field-ancho-completo"><label>Motivo</label><div class="input-wrap"><input type="text" id="hConMotivo" placeholder="Ej: Control anual, vómitos, cojera..."></div></div>
+                <div class="field-group field-ancho-completo"><label>Diagnóstico</label><div class="input-wrap"><input type="text" id="hConDiagnostico"></div></div>
+                <div class="field-group field-ancho-completo"><label>Tratamiento indicado</label><div class="input-wrap"><input type="text" id="hConTratamiento"></div></div>
+                <div class="field-group field-ancho-completo"><label>Observaciones</label><div class="input-wrap"><input type="text" id="hConObservaciones"></div></div>
+            `)}
+            ${lista.length ? `<div class="historial-lista">${filas}</div>` : plantillaVacia('Aún no hay consultas registradas.')}
+        `;
+    }
+
+    async function guardarConsulta(form) {
+        const payload = {
+            mascota_id: mascotaId,
+            fecha: valor('hConFecha') || Utils.hoy(),
+            motivo: valor('hConMotivo'),
+            diagnostico: valor('hConDiagnostico'),
+            tratamiento: valor('hConTratamiento'),
+            observaciones: valor('hConObservaciones'),
+            registrado_por: window.appData.usuario.id
+        };
+        await insertarYRecargar('mascotas_consultas', payload, form);
+    }
+
+    // ── Cirugías ─────────────────────────────────────────────────
+    function tabCirugias() {
+        const lista = datos.cirugias;
+        const filas = lista.map((c) => `
+            <div class="historial-fila">
+                <div class="historial-fila-info">
+                    <strong>${esc(c.nombre)}</strong>
+                    <span class="historial-fila-sub">${formatearFechaHora(c.fecha)}</span>
+                    ${c.resultado ? `<span class="historial-fila-sub">Resultado: ${esc(c.resultado)}</span>` : ''}
+                    ${c.complicaciones ? `<span class="historial-fila-sub">Complicaciones: ${esc(c.complicaciones)}</span>` : ''}
+                    ${c.indicaciones ? `<span class="historial-fila-sub">Indicaciones: ${esc(c.indicaciones)}</span>` : ''}
+                </div>
+                <button class="btn-peligro btn-historial-eliminar" data-tabla="mascotas_cirugias" data-id="${c.id}">Eliminar</button>
+            </div>
+        `).join('');
+
+        return `
+            ${formularioTab('cirugias', 'Registrar cirugía', `
+                <div class="field-group"><label>Nombre *</label><div class="input-wrap"><input type="text" id="hCirNombre" required placeholder="Ej: Esterilización"></div></div>
+                <div class="field-group"><label>Fecha *</label><div class="input-wrap"><input type="date" id="hCirFecha" value="${Utils.hoy()}" required></div></div>
+                <div class="field-group field-ancho-completo"><label>Resultado</label><div class="input-wrap"><input type="text" id="hCirResultado"></div></div>
+                <div class="field-group field-ancho-completo"><label>Complicaciones</label><div class="input-wrap"><input type="text" id="hCirComplicaciones"></div></div>
+                <div class="field-group field-ancho-completo"><label>Indicaciones post-operatorias</label><div class="input-wrap"><input type="text" id="hCirIndicaciones"></div></div>
+            `)}
+            ${lista.length ? `<div class="historial-lista">${filas}</div>` : plantillaVacia('Aún no hay cirugías registradas.')}
+        `;
+    }
+
+    async function guardarCirugia(form) {
+        const payload = {
+            mascota_id: mascotaId,
+            nombre: valor('hCirNombre'),
+            fecha: valor('hCirFecha') || Utils.hoy(),
+            resultado: valor('hCirResultado'),
+            complicaciones: valor('hCirComplicaciones'),
+            indicaciones: valor('hCirIndicaciones'),
+            registrado_por: window.appData.usuario.id
+        };
+        if (!payload.nombre) return mensajeError('El nombre de la cirugía es obligatorio.');
+        await insertarYRecargar('mascotas_cirugias', payload, form);
+    }
+
+    // ── Diagnósticos ─────────────────────────────────────────────
+    function tabDiagnosticos() {
+        const lista = datos.diagnosticos;
+        const filas = lista.map((d) => `
+            <div class="historial-fila">
+                <div class="historial-fila-info">
+                    <strong>${esc(d.nombre)}</strong>
+                    <span class="historial-fila-sub">${Utils.formatearFecha(d.fecha)}${d.descripcion ? ' · ' + esc(d.descripcion) : ''}</span>
+                </div>
+                ${d.estado ? `<span class="badge-estado ${claseEstadoDiagnostico(d.estado)}">${etiquetaEstadoDiagnostico(d.estado)}</span>` : ''}
+                <button class="btn-peligro btn-historial-eliminar" data-tabla="mascotas_diagnosticos" data-id="${d.id}">Eliminar</button>
+            </div>
+        `).join('');
+
+        return `
+            ${formularioTab('diagnosticos', 'Registrar diagnóstico', `
+                <div class="field-group"><label>Nombre *</label><div class="input-wrap"><input type="text" id="hDiagNombre" required placeholder="Ej: Dermatitis alérgica"></div></div>
+                <div class="field-group"><label>Fecha *</label><div class="input-wrap"><input type="date" id="hDiagFecha" value="${Utils.hoy()}" required></div></div>
+                <div class="field-group"><label>Estado</label><div class="input-wrap"><select id="hDiagEstado">
+                    <option value="activo">Activo</option>
+                    <option value="en_tratamiento">En tratamiento</option>
+                    <option value="resuelto">Resuelto</option>
+                    <option value="cronico">Crónico</option>
+                </select></div></div>
+                <div class="field-group field-ancho-completo"><label>Descripción</label><div class="input-wrap"><input type="text" id="hDiagDescripcion"></div></div>
+            `)}
+            ${lista.length ? `<div class="historial-lista">${filas}</div>` : plantillaVacia('Aún no hay diagnósticos registrados.')}
+        `;
+    }
+
+    async function guardarDiagnostico(form) {
+        const payload = {
+            mascota_id: mascotaId,
+            nombre: valor('hDiagNombre'),
+            fecha: valor('hDiagFecha') || Utils.hoy(),
+            estado: valor('hDiagEstado') || 'activo',
+            descripcion: valor('hDiagDescripcion'),
+            registrado_por: window.appData.usuario.id
+        };
+        if (!payload.nombre) return mensajeError('El nombre del diagnóstico es obligatorio.');
+        await insertarYRecargar('mascotas_diagnosticos', payload, form);
+    }
+
+    function etiquetaEstadoDiagnostico(estado) {
+        return { activo: 'Activo', en_tratamiento: 'En tratamiento', resuelto: 'Resuelto', cronico: 'Crónico' }[estado] || estado;
+    }
+
+    function claseEstadoDiagnostico(estado) {
+        return { resuelto: 'badge-aprobado', activo: 'badge-pendiente', en_tratamiento: 'badge-pendiente', cronico: 'badge-rechazado' }[estado] || '';
     }
 
     // ── Vacunas ──────────────────────────────────────────────────
@@ -593,7 +740,10 @@ const Historial = (() => {
     async function manejarSubmit(ev) {
         ev.preventDefault();
         const guardadores = {
+            consultas: guardarConsulta,
             vacunas: guardarVacuna,
+            cirugias: guardarCirugia,
+            diagnosticos: guardarDiagnostico,
             medicamentos: guardarMedicamento,
             desparasitacion: guardarDesparasitacion,
             alimentacion: guardarAlimentacion,

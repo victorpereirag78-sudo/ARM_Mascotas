@@ -32,7 +32,7 @@ const ROL_MODULOS = {
         'panel-compartir'
     ],
     'veterinario': [
-        // Reservado — Módulo Veterinario (futuro)
+        'panel-veterinario'
     ],
     'clinica': [
         // Reservado — Módulo Clínica (futuro)

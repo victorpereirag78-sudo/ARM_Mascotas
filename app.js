@@ -9,6 +9,7 @@ const PANELES = [
     { id: 'panel-agenda', icono: '🗓️', etiqueta: 'Agenda', modulo: () => window.Agenda },
     { id: 'panel-perfil', icono: '👤', etiqueta: 'Mi perfil', modulo: () => window.Perfil },
     { id: 'panel-compartir', icono: '🤝', etiqueta: 'Compartir', modulo: () => window.Compartir },
+    { id: 'panel-veterinario', icono: '🩺', etiqueta: 'Mis pacientes', modulo: () => window.Veterinario },
     { id: 'panel-admin', icono: '🛡️', etiqueta: 'Administración', modulo: () => window.Admin }
 ];
 
