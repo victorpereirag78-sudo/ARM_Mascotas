@@ -84,6 +84,7 @@ const Admin = (() => {
                 <span class="badge-estado badge-${p.estado_cuenta}">${ETIQUETAS_ESTADO[p.estado_cuenta] || p.estado_cuenta}</span>
                 <div class="admin-fila-acciones">
                     ${esUnoMismo ? '<span class="admin-fila-tu">(tú)</span>' : accionesPara(p)}
+                    <button class="btn-secundario btn-enviar-reset" data-correo="${esc(p.correo)}">Enviar reset de contraseña</button>
                 </div>
             </div>
         `;
@@ -117,6 +118,25 @@ const Admin = (() => {
         document.querySelectorAll('.btn-cambiar-estado').forEach((btn) => {
             btn.addEventListener('click', () => cambiarEstado(btn.dataset.id, btn.dataset.estado));
         });
+
+        document.querySelectorAll('.btn-enviar-reset').forEach((btn) => {
+            btn.addEventListener('click', () => enviarReset(btn));
+        });
+    }
+
+    async function enviarReset(btn) {
+        const correo = btn.dataset.correo;
+        if (!confirm(`¿Enviar correo de recuperación de contraseña a ${correo}?`)) return;
+
+        Utils.setLoading(btn, true, 'Enviando...');
+        const res = await Auth.solicitarRecuperacion(correo);
+        Utils.setLoading(btn, false);
+
+        if (!res.ok) {
+            Utils.toast('No se pudo enviar: ' + res.error, 'error');
+            return;
+        }
+        Utils.toast(`Correo de recuperación enviado a ${correo}`, 'exito');
     }
 
     async function cambiarEstado(id, nuevoEstado) {

@@ -16,6 +16,7 @@
     --color-exito: #2f9e58;
     --sombra-card: 0 20px 60px -20px rgba(36, 33, 31, 0.25);
     --radio: 16px;
+    color-scheme: light;
 }
 
 :root[data-theme="dark"] {
@@ -25,6 +26,7 @@
     --color-texto-suave: #a8a29b;
     --color-borde: #34303a;
     --sombra-card: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,6 +37,7 @@
         --color-texto-suave: #a8a29b;
         --color-borde: #34303a;
         --sombra-card: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+        color-scheme: dark;
     }
 }
 
@@ -171,6 +174,14 @@ body {
     font-family: inherit;
 }
 
+/* La lista desplegable de <option> la dibuja el sistema operativo, no
+   la app — sin esto, algunos navegadores la muestran siempre en
+   blanco con texto claro sobre fondo claro en modo oscuro. */
+.input-wrap select option {
+    background-color: var(--color-superficie);
+    color: var(--color-texto);
+}
+
 /* El navegador fuerza un fondo propio (blanco/amarillo) en campos con
    autocompletado, ignorando el tema — se sobreescribe con el truco del
    box-shadow interno para que respete los colores de la app. */
@@ -187,6 +198,9 @@ body {
     background-color: var(--color-fondo);
     color: var(--color-texto);
 }
+
+.form-inline-link { margin: 6px 0 0; text-align: right; font-size: 12px; }
+.form-inline-link a { color: var(--color-primario); text-decoration: none; font-weight: 600; }
 
 .field-error {
     display: block;

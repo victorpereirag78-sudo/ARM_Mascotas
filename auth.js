@@ -113,11 +113,32 @@ const Auth = (() => {
         return mensaje;
     }
 
+    // ── Recuperación de contraseña ──────────────────────────────────
+    // Público (no requiere sesión): Supabase envía un correo con un
+    // link mágico que redirige a actualizar-password.html con una
+    // sesión de recuperación ya activa.
+    async function solicitarRecuperacion(email) {
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/actualizar-password.html`
+        });
+        if (error) return { ok: false, error: error.message };
+        return { ok: true };
+    }
+
+    // Requiere la sesión de recuperación activa (viene del link del correo).
+    async function actualizarPassword(nuevaPassword) {
+        const { error } = await db.auth.updateUser({ password: nuevaPassword });
+        if (error) return { ok: false, error: traducirErrorAuth(error.message) };
+        return { ok: true };
+    }
+
     return {
         registrarDueno,
         login,
         logout,
         restaurarSesion,
-        puedeAcceder
+        puedeAcceder,
+        solicitarRecuperacion,
+        actualizarPassword
     };
 })();

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0ea5a1">
+    <title>ARM Mascotas — Recuperar contraseña</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+
+    <button id="btnTema" class="btn-tema" type="button" aria-label="Cambiar tema" title="Cambiar tema">🌙</button>
+
+    <main class="login-wrapper">
+
+        <div class="brand-panel">
+            <div class="brand-content">
+                <div class="brand-logo">🐾</div>
+                <h1 class="brand-title">ARM<br>Mascotas</h1>
+                <p class="brand-sub">La historia de vida de tu<br>mascota, siempre contigo</p>
+            </div>
+        </div>
+
+        <div class="form-panel">
+            <div class="form-card">
+
+                <div class="form-header">
+                    <h2>Recuperar contraseña</h2>
+                    <p>Te enviaremos un correo con un link para crear una contraseña nueva.</p>
+                </div>
+
+                <form id="recuperarForm" novalidate>
+
+                    <div class="field-group">
+                        <label for="email">Correo electrónico</label>
+                        <div class="input-wrap">
+                            <input type="email" id="email" name="email" placeholder="tucorreo@ejemplo.com" required autocomplete="email">
+                        </div>
+                        <span class="field-error" id="errEmail"></span>
+                    </div>
+
+                    <div class="field-msg" id="mensajeGeneral"></div>
+
+                    <button type="submit" class="btn-primario" id="btnEnviar">Enviar correo de recuperación</button>
+
+                    <p class="form-footer-link">
+                        <a href="/index.html">← Volver a iniciar sesión</a>
+                    </p>
+
+                </form>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config.js"></script>
+    <script src="/config.local.js" onerror="this.remove()"></script>
+    <script src="/utils.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/recuperar.js"></script>
+</body>
+</html>

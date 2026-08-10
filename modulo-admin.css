@@ -38,9 +38,10 @@
 .admin-fila-ubicacion,
 .admin-fila-fecha { font-size: 12px; color: var(--color-texto-suave); }
 
-.admin-fila-acciones { display: flex; gap: 8px; margin-left: auto; }
+.admin-fila-acciones { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .admin-fila-acciones .btn-primario,
-.admin-fila-acciones .btn-peligro { padding: 8px 14px; font-size: 13px; }
+.admin-fila-acciones .btn-peligro,
+.admin-fila-acciones .btn-secundario { padding: 8px 14px; font-size: 13px; }
 .admin-fila-tu { font-size: 12px; color: var(--color-texto-suave); font-style: italic; }
 
 .badge-aprobado { background: rgba(47, 158, 88, 0.15); color: var(--color-exito); }

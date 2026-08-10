@@ -135,7 +135,7 @@ const Mascota = (() => {
                         </div>
                         <div class="field-group">
                             <label>Fecha de nacimiento</label>
-                            <div class="input-wrap"><input type="date" id="mFechaNacimiento" value="${m.fecha_nacimiento || ''}"></div>
+                            <div class="input-wrap"><input type="date" id="mFechaNacimiento" value="${m.fecha_nacimiento || ''}" max="${Utils.hoy()}"></div>
                         </div>
                         <div class="field-group">
                             <label>Edad calculada</label>
@@ -271,6 +271,12 @@ const Mascota = (() => {
 
         if (!datos.nombre || !datos.especie) {
             mensaje.textContent = 'Nombre y especie son obligatorios.';
+            mensaje.className = 'field-msg msg-error';
+            return;
+        }
+
+        if (datos.fecha_nacimiento && datos.fecha_nacimiento > Utils.hoy()) {
+            mensaje.textContent = 'La fecha de nacimiento no puede ser posterior a hoy.';
             mensaje.className = 'field-msg msg-error';
             return;
         }
