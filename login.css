@@ -40,6 +40,13 @@
 
 * { box-sizing: border-box; }
 
+/* El atributo hidden debe ganar siempre, incluso sobre clases que ya
+   fijan su propio display (ej. .app-shell{display:grid}) — por
+   cascada CSS, una regla de autor con display gana sobre la regla
+   [hidden]{display:none} del user-agent aunque tenga menos
+   especificidad, así que hay que forzarlo explícitamente aquí. */
+[hidden] { display: none !important; }
+
 body {
     margin: 0;
     font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
