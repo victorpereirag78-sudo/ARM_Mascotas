@@ -27,7 +27,7 @@
     justify-content: center;
     font-size: 44px;
 }
-.mascota-card-foto img { width: 100%; height: 100%; object-fit: cover; }
+.mascota-card-foto img { width: 100%; height: 100%; object-fit: contain; }
 
 .mascota-card-info { padding: 14px; }
 .mascota-card-info h3 { margin: 0 0 4px; font-size: 16px; }
