@@ -20,7 +20,7 @@
 }
 
 .mascota-card-foto {
-    height: 140px;
+    height: 220px;
     background: var(--color-fondo);
     display: flex;
     align-items: center;
@@ -33,7 +33,12 @@
 .mascota-card-info h3 { margin: 0 0 4px; font-size: 16px; }
 .mascota-card-info p { margin: 0 0 12px; font-size: 13px; color: var(--color-texto-suave); }
 
-.mascota-avatar-fila .perfil-avatar { background: var(--color-secundario); }
+.mascota-avatar-fila .perfil-avatar {
+    width: 140px;
+    height: 140px;
+    font-size: 48px;
+    background: var(--color-secundario);
+}
 
 .edad-en-vivo { padding: 12px 4px; font-size: 14px; font-weight: 600; color: var(--color-primario); }
 
