@@ -116,6 +116,7 @@ const Auth = (() => {
         if (/Invalid login credentials/i.test(mensaje)) return 'Correo o contraseña incorrectos.';
         if (/User already registered/i.test(mensaje)) return 'Ya existe una cuenta con ese correo.';
         if (/Password should be/i.test(mensaje)) return 'La contraseña debe tener al menos 6 caracteres.';
+        if (/known to be weak|easy to guess/i.test(mensaje)) return 'Esa contraseña es muy común y fácil de adivinar. Elegí una diferente.';
         return mensaje;
     }
 

@@ -16,14 +16,25 @@
     Utils.inicializarTema(document.getElementById('btnTema'));
 
     const APPS = {
-        mascotas: { nombre: 'ARM Mascotas', url: 'https://arm-mascotas.pages.dev/index.html' },
-        mivehiculo: { nombre: 'Mi Vehículo', url: 'https://mi-vehiculo.pages.dev/' },
-        emprendedores: { nombre: 'ARM Emprendedores', url: 'https://arm-emprendedores.pages.dev/' },
-        documentosauto: { nombre: 'ARM Documentos Auto', url: 'https://arm-documentosauto.pages.dev/' },
-        taller: { nombre: 'Taller App', url: 'https://tallerapp.cl/' },
-        mendezc: { nombre: 'Méndez C.', url: 'https://www.mendezc.cl/' }
+        mascotas: { nombre: 'ARM Mascotas', url: 'https://arm-mascotas.pages.dev/index.html', icono: '🐾' },
+        mivehiculo: { nombre: 'Mi Vehículo', url: 'https://mi-vehiculo.pages.dev/', icono: '🚗' },
+        emprendedores: { nombre: 'ARM Emprendedores', url: 'https://arm-emprendedores.pages.dev/', icono: '💼' },
+        documentosauto: { nombre: 'ARM Documentos Auto', url: 'https://arm-documentosauto.pages.dev/', icono: '📄' },
+        taller: { nombre: 'Taller App', url: 'https://tallerapp.cl/', icono: '🔧' },
+        mendezc: { nombre: 'Méndez C.', url: 'https://www.mendezc.cl/', icono: '🔧' }
     };
     const appOrigen = new URLSearchParams(window.location.search).get('volver');
+
+    // Esta página vive en el dominio de ARM Mascotas pero es el punto
+    // compartido de recuperación para todas las apps: si quien llega viene
+    // de otra, la marca (logo/título) se adapta para que no parezca que
+    // "cayó en la app equivocada".
+    if (appOrigen && appOrigen !== 'mascotas' && APPS[appOrigen]) {
+        const appActual = APPS[appOrigen];
+        document.querySelector('.brand-logo').textContent = appActual.icono;
+        document.querySelector('.brand-title').innerHTML = appActual.nombre.replace(' ', '<br>');
+        document.querySelector('.brand-sub').textContent = 'Recuperación de contraseña';
+    }
 
     const subtitulo = document.getElementById('subtitulo');
     const form = document.getElementById('passwordForm');
