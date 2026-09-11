@@ -4,14 +4,32 @@
 // Se llega acá solo desde el link del correo de recuperación: Supabase
 // pone el token de recuperación en la URL y el cliente lo detecta solo,
 // disparando el evento PASSWORD_RECOVERY.
+//
+// Esta página es el punto ÚNICO de recuperación para todas las apps
+// que comparten este mismo proyecto Supabase (mascotas, mi vehículo,
+// emprendedores, documentos auto, taller): cada una arma su
+// redirectTo con ?volver=<slug> para que, al terminar, el usuario
+// pueda volver directo a la app desde la que pidió el cambio.
 // ================================================================
 
 (() => {
     Utils.inicializarTema(document.getElementById('btnTema'));
 
+    const APPS = {
+        mascotas: { nombre: 'ARM Mascotas', url: 'https://arm-mascotas.pages.dev/index.html' },
+        mivehiculo: { nombre: 'Mi Vehículo', url: 'https://mi-vehiculo.pages.dev/' },
+        emprendedores: { nombre: 'ARM Emprendedores', url: 'https://arm-emprendedores.pages.dev/' },
+        documentosauto: { nombre: 'ARM Documentos Auto', url: 'https://arm-documentosauto.pages.dev/' },
+        taller: { nombre: 'Taller App', url: 'https://tallerapp.cl/' },
+        mendezc: { nombre: 'Méndez C.', url: 'https://www.mendezc.cl/' }
+    };
+    const appOrigen = new URLSearchParams(window.location.search).get('volver');
+
     const subtitulo = document.getElementById('subtitulo');
     const form = document.getElementById('passwordForm');
     const linkVolver = document.getElementById('linkVolver');
+    const panelApps = document.getElementById('panelApps');
+    const listaApps = document.getElementById('listaApps');
     const btnGuardar = document.getElementById('btnGuardar');
     const mensajeGeneral = document.getElementById('mensajeGeneral');
 
@@ -62,8 +80,8 @@
 
         await db.auth.signOut();
         form.hidden = true;
-        subtitulo.textContent = '¡Contraseña actualizada! Ya puedes iniciar sesión con tu nueva contraseña.';
-        mostrarLinkVolver('← Ir a iniciar sesión', '/index.html');
+        subtitulo.textContent = '¡Contraseña actualizada! Elegí a qué app querés entrar:';
+        mostrarPanelApps();
     });
 
     function mostrarLinkVolver(texto, href) {
@@ -71,6 +89,24 @@
         a.textContent = texto;
         a.href = href;
         linkVolver.hidden = false;
+    }
+
+    function mostrarPanelApps() {
+        listaApps.innerHTML = '';
+
+        const slugs = Object.keys(APPS)
+            .sort((a, b) => (a === appOrigen ? -1 : b === appOrigen ? 1 : 0));
+
+        slugs.forEach((slug) => {
+            const app = APPS[slug];
+            const a = document.createElement('a');
+            a.href = app.url;
+            a.textContent = `Ir a ${app.nombre}`;
+            a.className = slug === appOrigen ? 'btn-app btn-app-primario' : 'btn-app';
+            listaApps.appendChild(a);
+        });
+
+        panelApps.hidden = false;
     }
 
     function mostrarError(idSpan, texto) {

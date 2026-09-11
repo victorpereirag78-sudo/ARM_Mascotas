@@ -118,8 +118,12 @@ const Auth = (() => {
     // link mágico que redirige a actualizar-password.html con una
     // sesión de recuperación ya activa.
     async function solicitarRecuperacion(email) {
+        // "volver" identifica a la app de origen para que actualizar-password.html
+        // (punto único de recuperación para todas las apps del mismo Supabase)
+        // sepa a qué app ofrecer volver una vez cambiada la contraseña.
+        const volver = new URLSearchParams(window.location.search).get('volver') || 'mascotas';
         const { error } = await db.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/actualizar-password.html`
+            redirectTo: `${window.location.origin}/actualizar-password.html?volver=${encodeURIComponent(volver)}`
         });
         if (error) return { ok: false, error: error.message };
         return { ok: true };

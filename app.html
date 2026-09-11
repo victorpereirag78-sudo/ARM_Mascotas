@@ -2,6 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Red de seguridad: un link de recuperación de contraseña nunca debe
+        // tratarse como un login normal, caiga en la página que caiga por una
+        // config de Supabase desactualizada — siempre se manda primero a
+        // crear la contraseña nueva.
+        if (/type=recovery/.test(location.hash)) {
+            location.replace('/actualizar-password.html' + location.hash);
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0ea5a1">
     <title>ARM Mascotas</title>
