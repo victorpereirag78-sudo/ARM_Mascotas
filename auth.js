@@ -14,7 +14,13 @@ const Auth = (() => {
         const { data, error } = await db.auth.signUp({
             email,
             password,
-            options: { data: { nombre: datosPerfil.nombre || '' } }
+            options: {
+                data: { nombre: datosPerfil.nombre || '' },
+                // Fijo, sin depender del Site URL del proyecto (ese queda
+                // apuntando a actualizar-password.html como respaldo del
+                // flujo de recuperación, no del de confirmación de cuenta).
+                emailRedirectTo: `${window.location.origin}/index.html`
+            }
         });
         if (error) return { ok: false, error: error.message };
         if (!data.user) {
