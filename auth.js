@@ -15,7 +15,12 @@ const Auth = (() => {
             email,
             password,
             options: {
-                data: { nombre: datosPerfil.nombre || '' },
+                // `producto` le dice al trigger que este registro sí es de
+                // ARM Mascotas: el proyecto de Supabase es compartido con
+                // otras apps, y sin esta marca cualquier registro ajeno
+                // también creaba acá un perfil (rol 'dueno') para gente que
+                // nunca abrió ARM Mascotas.
+                data: { producto: 'mascotas', nombre: datosPerfil.nombre || '' },
                 // Fijo, sin depender del Site URL del proyecto (ese queda
                 // apuntando a actualizar-password.html como respaldo del
                 // flujo de recuperación, no del de confirmación de cuenta).
@@ -84,13 +89,23 @@ const Auth = (() => {
             .from('mascotas_perfiles')
             .select('*')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
         if (errorPerfil) return { ok: false, error: errorPerfil.message };
 
+        let perfilFinal = perfil;
+        if (!perfilFinal) {
+            // Ya tenía cuenta por otra app (el proyecto de Supabase es
+            // compartido) y esta es su primera vez real en ARM Mascotas:
+            // se le da de alta recién ahora.
+            const { data: nuevo, error: errorAlta } = await db.rpc('fn_asegurar_mi_perfil_mascotas');
+            if (errorAlta) return { ok: false, error: errorAlta.message };
+            perfilFinal = nuevo;
+        }
+
         window.appData.usuario = user;
-        window.appData.perfil = perfil;
-        return { ok: true, perfil };
+        window.appData.perfil = perfilFinal;
+        return { ok: true, perfil: perfilFinal };
     }
 
     // Completa el perfil con los datos guardados en registrarDueno() cuando
