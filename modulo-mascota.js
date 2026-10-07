@@ -16,6 +16,13 @@ const Mascota = (() => {
         vista = 'lista';
         editando = null;
         await cargarMascotas();
+        // Llegó desde un aviso de la veterinaria: abrir directo esa mascota.
+        const abrir = sessionStorage.getItem('arm_abrir_mascota');
+        if (abrir) {
+            sessionStorage.removeItem('arm_abrir_mascota');
+            const m = (window.appData.mascotas || []).find((x) => x.id === abrir);
+            if (m) { editando = m; vista = 'formulario'; }
+        }
         render();
     }
 
@@ -186,6 +193,10 @@ const Mascota = (() => {
 
                 ${esEdicion ? `
                     <div class="historial-wrap">
+                        <h3 class="seccion-titulo historial-wrap-titulo">🩺 Carpeta médica de la veterinaria</h3>
+                        <div id="carpetaVetContenedor"></div>
+                    </div>
+                    <div class="historial-wrap">
                         <h3 class="seccion-titulo historial-wrap-titulo">SOS y código QR</h3>
                         <div id="qrContenedor"></div>
                     </div>
@@ -242,6 +253,11 @@ const Mascota = (() => {
 
         const btnEliminar = document.getElementById('btnEliminarMascota');
         if (btnEliminar) btnEliminar.addEventListener('click', eliminar);
+
+        const carpetaVetContenedor = document.getElementById('carpetaVetContenedor');
+        if (carpetaVetContenedor && editando && window.CarpetaVet) {
+            CarpetaVet.init(carpetaVetContenedor, editando);
+        }
 
         const historialContenedor = document.getElementById('historialContenedor');
         if (historialContenedor && editando) {

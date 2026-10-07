@@ -6,6 +6,7 @@
 const PANELES = [
     { id: 'panel-dashboard', icono: '🏠', etiqueta: 'Dashboard', modulo: () => window.Dashboard },
     { id: 'panel-mascotas', icono: '🐾', etiqueta: 'Mis mascotas', modulo: () => window.Mascota },
+    { id: 'panel-veterinaria', icono: '🏥', etiqueta: 'Mi veterinaria', modulo: () => window.VetApp },
     { id: 'panel-agenda', icono: '🗓️', etiqueta: 'Agenda', modulo: () => window.Agenda },
     { id: 'panel-perfil', icono: '👤', etiqueta: 'Mi perfil', modulo: () => window.Perfil },
     { id: 'panel-compartir', icono: '🤝', etiqueta: 'Compartir', modulo: () => window.Compartir },
@@ -38,6 +39,11 @@ const MENSAJES_CUENTA_BLOQUEADA = {
         return;
     }
 
+    // Enlaces de ARM Veterinaria: ?vet=vincular&codigo=… (invitación de la
+    // clínica) y ?vet=notificaciones&mascota=… (al tocar un push).
+    const parametros = new URLSearchParams(window.location.search);
+    if (parametros.get('codigo')) VetApp.guardarCodigo(parametros.get('codigo'));
+
     if (window.appData.perfil.estado_cuenta !== 'aprobado') {
         mostrarCuentaBloqueada(window.appData.perfil.estado_cuenta);
         return;
@@ -55,8 +61,18 @@ const MENSAJES_CUENTA_BLOQUEADA = {
         window.location.href = '/index.html';
     });
 
-    const panelInicial = PANELES.find((p) => Auth.puedeAcceder(p.id)) || PANELES[0];
+    const destinoVet = parametros.get('vet');
+    if (parametros.get('mascota')) sessionStorage.setItem('arm_abrir_mascota', parametros.get('mascota'));
+    if (parametros.toString()) history.replaceState(null, '', '/app.html');
+    const quiereVet = (destinoVet && destinoVet !== 'inicio') || VetApp.leerCodigo();
+    const panelInicial = (quiereVet && Auth.puedeAcceder('panel-veterinaria'))
+        ? PANELES.find((p) => p.id === (parametros.get('mascota') ? 'panel-mascotas' : 'panel-veterinaria'))
+        : (PANELES.find((p) => Auth.puedeAcceder(p.id)) || PANELES[0]);
     irAPanel(panelInicial.id);
+    if (Auth.puedeAcceder('panel-veterinaria')) {
+        VetApp.actualizarInsignia();
+        VetApp.escucharEnVivo();
+    }
 
     registrarServiceWorker();
 })();
@@ -71,6 +87,9 @@ function mostrarCuentaBloqueada(estado) {
 
     const overlay = document.getElementById('cuentaBloqueada');
     overlay.hidden = false;
+
+    // Cuenta en revisión: si su veterinaria la invitó, el código la activa.
+    if (estado === 'pendiente') VetApp.ofrecerEnCuentaPendiente(overlay.querySelector('.cuenta-bloqueada-card'));
 
     document.getElementById('btnLogoutBloqueado').addEventListener('click', async () => {
         await Auth.logout();

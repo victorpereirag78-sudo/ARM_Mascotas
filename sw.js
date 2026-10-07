@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v4';
+const CACHE_NAME = 'arm-mascotas-v5';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -38,6 +38,7 @@ const ARCHIVOS_SHELL = [
     '/modulo-emergencia.css',
     '/modulo-perdida.css',
     '/modulo-pasaporte.css',
+    '/modulo-veterinaria.css',
     '/qr-publico.css',
     '/pasaporte-publico.css',
     '/config.js',
@@ -61,6 +62,10 @@ const ARCHIVOS_SHELL = [
     '/modulo-emergencia.js',
     '/modulo-perdida.js',
     '/modulo-pasaporte.js',
+    '/modulo-veterinaria.js',
+    '/vincular.html',
+    '/vincular.js',
+    '/vincular.css',
     '/qr.js',
     '/pasaporte.js',
     '/manifest.json',
@@ -136,4 +141,40 @@ self.addEventListener('fetch', (evento) => {
             });
         })
     );
+});
+
+// ================================================================
+// Web Push de ARM Veterinaria
+// Llega cifrado desde la Edge Function vet-dispatch con
+// { title, body, url, tag }. Al tocarlo se abre (o enfoca) la app en
+// la pantalla del aviso.
+// ================================================================
+self.addEventListener('push', (evento) => {
+    let d = {};
+    try { d = evento.data ? evento.data.json() : {}; } catch (_e) { d = { body: evento.data ? evento.data.text() : '' }; }
+    evento.waitUntil(
+        self.registration.showNotification(d.title || 'ARM Mascotas', {
+            body: d.body || '',
+            icon: '/icons/icon-192.svg',
+            badge: '/icons/icon-192.svg',
+            tag: d.tag || undefined,
+            data: { url: d.url || '/app.html?vet=notificaciones' }
+        })
+    );
+});
+
+self.addEventListener('notificationclick', (evento) => {
+    evento.notification.close();
+    const destino = new URL((evento.notification.data && evento.notification.data.url) || '/app.html', self.location.origin).href;
+    evento.waitUntil((async () => {
+        const ventanas = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const v of ventanas) {
+            if (new URL(v.url).origin === self.location.origin) {
+                await v.focus();
+                if ('navigate' in v) await v.navigate(destino);
+                return;
+            }
+        }
+        await self.clients.openWindow(destino);
+    })());
 });

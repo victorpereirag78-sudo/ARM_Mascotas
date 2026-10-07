@@ -15,6 +15,7 @@ const Dashboard = (() => {
         pendientesPorMascota = await cargarPendientes(mascotas.map((m) => m.id));
         el.innerHTML = plantilla(mascotas);
         wireEventos(el);
+        if (window.VetApp) VetApp.decorarDashboard(el);
     }
 
     async function cargarPendientes(idsMascotas) {
