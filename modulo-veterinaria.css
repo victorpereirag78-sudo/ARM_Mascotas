@@ -113,3 +113,8 @@
     .vet-seccion { padding: 16px; }
     .vet-asignacion { min-width: 100%; }
 }
+
+/* Plan de salud en la carpeta médica */
+.vet-plan { border: 1px solid color-mix(in srgb, #d97706 35%, transparent); background: color-mix(in srgb, #d97706 7%, var(--color-superficie)); margin-bottom: 14px; }
+.vet-plan h4 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.vet-plan-vence { margin: 0 0 8px; font-size: 13px; color: var(--color-texto-suave); }

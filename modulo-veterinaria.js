@@ -433,7 +433,12 @@ const CarpetaVet = (() => {
         pestana = 'resumen';
         el.innerHTML = '<p class="vet-vacio">Cargando la carpeta médica...</p>';
         try {
-            datos = await rpc('vet_app_historial', { p_mascota_app: mascota.id });
+            const [historial, planes] = await Promise.all([
+                rpc('vet_app_historial', { p_mascota_app: mascota.id }),
+                rpc('vet_app_planes', { p_mascota_app: mascota.id }).catch(() => [])
+            ]);
+            datos = historial;
+            datos.planes = planes || [];
         } catch (_e) {
             el.innerHTML = `
                 <p class="vet-vacio">Cuando tu veterinaria use <b>ARM Veterinaria</b>, aquí verás automáticamente las vacunas, consultas,
@@ -485,6 +490,7 @@ const CarpetaVet = (() => {
                 const alergias = (datos.antecedentes || []).filter((a) => a.alergias);
                 const vigentes = (datos.tratamientos || []).filter((t) => t.vigente);
                 return `
+                    ${planSalud()}
                     ${alergias.length ? `<div class="vet-alerta">⚠️ <b>Alergias:</b> ${alergias.map((a) => h(a.alergias)).join(' · ')}</div>` : ''}
                     <div class="vet-resumen-grid">
                         <div class="vet-bloque">
@@ -551,6 +557,22 @@ const CarpetaVet = (() => {
                     ${lista(g.grupos || [], (x) => `<li class="vet-proximo"><span>${h(x.grupo)}</span><b>$${Number(x.total).toLocaleString('es-CL')}</b></li>`, 'Sin compras.')}</div>`).join('');
         }
         return '';
+    }
+
+    // Plan de salud vigente: lo incluido que queda en el ciclo y el descuento.
+    function planSalud() {
+        return (datos.planes || []).map((p) => {
+            const dias = Math.ceil((new Date(p.termino + 'T00:00:00') - Date.now()) / 86400000);
+            const quedan = (b) => Math.max(0, Number(b.cantidad) - Number(b.usados));
+            return `
+                <div class="vet-bloque vet-plan">
+                    <h4>⭐ ${h(p.plan)} <span class="vet-chip">${h(p.clinica)}</span></h4>
+                    <p class="vet-plan-vence">Vigente hasta el ${fecha(p.termino)}${dias <= 30 ? ` · <b class="vet-rojo">vence en ${dias} días</b>` : ''}</p>
+                    ${(p.beneficios || []).length ? `<ul class="vet-lista">${p.beneficios.map((b) => `<li class="vet-proximo"><span>${h(b.nombre)}</span><b>Quedan ${quedan(b)} de ${Number(b.cantidad)}</b></li>`).join('')}</ul>` : ''}
+                    ${Number(p.descuento_pct) > 0 ? `<p class="vet-nota">${Number(p.descuento_pct)} % de descuento en ${p.descuento_en === 'todo' ? 'todo lo demás' : p.descuento_en}.</p>` : ''}
+                    ${p.cuotas_pendientes > 0 ? `<p class="vet-nota vet-rojo">Tienes ${p.cuotas_pendientes} cuota${p.cuotas_pendientes > 1 ? 's' : ''} pendiente${p.cuotas_pendientes > 1 ? 's' : ''}.</p>` : ''}
+                </div>`;
+        }).join('');
     }
 
     function documentosDe(entidad, id) {
