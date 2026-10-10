@@ -41,7 +41,8 @@ const MENSAJES_CUENTA_BLOQUEADA = {
 
     // Enlaces de ARM Veterinaria: ?vet=vincular&codigo=… (invitación de la
     // clínica), ?vet=notificaciones&mascota=… (al tocar un push) y
-    // ?vet=presupuestos (push de un presupuesto por responder).
+    // ?vet=presupuestos (push de un presupuesto por responder) y ?vet=reservar,
+    // encuestas, consentimientos, citas o privacidad (secciones de Mi veterinaria).
     const parametros = new URLSearchParams(window.location.search);
     if (parametros.get('codigo')) VetApp.guardarCodigo(parametros.get('codigo'));
 
@@ -63,7 +64,7 @@ const MENSAJES_CUENTA_BLOQUEADA = {
     });
 
     const destinoVet = parametros.get('vet');
-    if (destinoVet === 'presupuestos') sessionStorage.setItem('arm_vet_seccion', 'presupuestos');
+    if (['presupuestos', 'reservar', 'encuestas', 'consentimientos', 'citas', 'privacidad'].includes(destinoVet)) sessionStorage.setItem('arm_vet_seccion', destinoVet);
     if (parametros.get('mascota')) sessionStorage.setItem('arm_abrir_mascota', parametros.get('mascota'));
     if (parametros.toString()) history.replaceState(null, '', '/app.html');
     const quiereVet = (destinoVet && destinoVet !== 'inicio') || VetApp.leerCodigo();

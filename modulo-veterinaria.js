@@ -65,9 +65,10 @@ const VetApp = (() => {
         let clinicas = [];
         let notificaciones = [];
         let presupuestos = [];
+        let extra = { citas: [], encuestas: [], consentimientos: [], privacidad: [] };
         try {
-            [clinicas, notificaciones, presupuestos] = await Promise.all([rpc('vet_app_mis_clinicas'), rpc('vet_app_notificaciones', { p_limite: 60 }),
-                rpc('vet_app_presupuestos').catch(() => [])]);
+            [clinicas, notificaciones, presupuestos, extra] = await Promise.all([rpc('vet_app_mis_clinicas'), rpc('vet_app_notificaciones', { p_limite: 60 }),
+                rpc('vet_app_presupuestos').catch(() => []), window.VetExtra ? VetExtra.cargar() : extra]);
         } catch (e) {
             el.innerHTML = `<div class="estado-vacio"><p>No pudimos cargar la información de tu veterinaria: ${h(e.message)}</p></div>`;
             return;
@@ -76,7 +77,9 @@ const VetApp = (() => {
 
         el.innerHTML = `
             <div class="vet-panel">
+                ${window.VetExtra ? VetExtra.htmlEncuestas(extra.encuestas) + VetExtra.htmlConsentimientos(extra.consentimientos) : ''}
                 ${presupuestos.length ? `<section class="card vet-seccion" id="vetPresupuestos">${Presupuestos.html(presupuestos)}</section>` : ''}
+                ${window.VetExtra && clinicas.length ? VetExtra.htmlCitas(extra.citas, clinicas) : ''}
                 <section class="card vet-seccion" id="vetSeccionVincular"></section>
                 <section class="card vet-seccion">
                     <div class="vet-seccion-cabecera">
@@ -92,6 +95,7 @@ const VetApp = (() => {
                     ${clinicas.length ? `<div class="vet-clinicas">${clinicas.map(tarjetaClinica).join('')}</div>`
                         : '<p class="vet-vacio">Aún no estás conectado con ninguna veterinaria.</p>'}
                 </section>
+                ${window.VetExtra ? VetExtra.htmlPrivacidad(extra.privacidad) : ''}
             </div>`;
 
         renderVinculacion(document.getElementById('vetSeccionVincular'), {
@@ -114,22 +118,34 @@ const VetApp = (() => {
                     actualizarInsignia();
                 }
                 if (li.dataset.presupuesto) Presupuestos.mostrar(el, li.dataset.presupuesto);
+                else if (li.dataset.seccion && window.VetExtra && el.querySelector(li.dataset.seccion)) VetExtra.mostrar(el, li.dataset.seccion);
                 else if (li.dataset.mascota) abrirMascota(li.dataset.mascota);
             });
         });
         Presupuestos.conectar(el, presupuestos, () => init(el));
-        // Llegó desde el push de un presupuesto: directo a la sección.
-        if (sessionStorage.getItem('arm_vet_seccion') === 'presupuestos') {
-            sessionStorage.removeItem('arm_vet_seccion');
-            Presupuestos.mostrar(el);
+        if (window.VetExtra) {
+            const recargar = () => init(el);
+            VetExtra.conectarEncuestas(el, recargar);
+            VetExtra.conectarConsentimientos(el, extra.consentimientos, recargar);
+            VetExtra.conectarCitas(el, extra.citas, clinicas, recargar);
+            VetExtra.conectarPrivacidad(el, recargar);
         }
+        // Llegó desde un push o un enlace: directo a la sección.
+        const seccion = sessionStorage.getItem('arm_vet_seccion');
+        sessionStorage.removeItem('arm_vet_seccion');
+        if (seccion === 'presupuestos') Presupuestos.mostrar(el);
+        else if (seccion === 'reservar' && window.VetExtra && el.querySelector('#vetCitas [data-reservar]')) el.querySelector('#vetCitas [data-reservar]').click();
+        else if (seccion && window.VetExtra) VetExtra.mostrar(el, { encuestas: '#vetEncuestas', consentimientos: '#vetConsentimientos', citas: '#vetCitas', privacidad: '#vetPrivacidad' }[seccion] || '#vetCitas');
         actualizarInsignia();
     }
+
+    // Avisos que abren una sección de "Mi veterinaria" (si existe; si no, la carpeta de la mascota).
+    const SECCION_AVISO = { encuesta: '#vetEncuestas', consentimiento: '#vetConsentimientos', cita: '#vetCitas' };
 
     function itemNotificacion(n) {
         return `
             <li class="vet-notif ${n.leida ? '' : 'no-leida'}" data-id="${h(n.id)}" ${n.accion && n.accion.tipo === 'presupuesto' ? `data-presupuesto="${h(n.accion.id)}"`
-                : n.mascota_app_id ? `data-mascota="${h(n.mascota_app_id)}"` : ''}>
+                : n.mascota_app_id ? `data-mascota="${h(n.mascota_app_id)}"` : ''} ${n.accion && SECCION_AVISO[n.accion.tipo] ? `data-seccion="${SECCION_AVISO[n.accion.tipo]}"` : ''}>
                 <div class="vet-notif-cuerpo">
                     <p class="vet-notif-titulo">${h(n.titulo)}</p>
                     ${n.mensaje ? `<p class="vet-notif-mensaje">${h(n.mensaje)}</p>` : ''}
@@ -334,6 +350,22 @@ const VetApp = (() => {
             const cab = el.querySelector('.dashboard-cabecera');
             if (cab) cab.after(aviso); else el.prepend(aviso);
         }
+        if (window.VetExtra) {
+            const [enc, cons] = await Promise.all([rpc('vet_app_encuestas').catch(() => []), rpc('vet_app_consentimientos').catch(() => [])]);
+            const porFirmar = (cons || []).filter((k) => k.estado === 'pendiente');
+            const banners = [
+                porFirmar.length && [`✍️ Tienes <b>${porFirmar.length}</b> ${porFirmar.length === 1 ? 'consentimiento' : 'consentimientos'} por firmar <span>Firmar →</span>`, 'consentimientos'],
+                (enc || []).length && [`⭐ Cuéntanos cómo te atendieron: <b>${enc.length}</b> ${enc.length === 1 ? 'encuesta' : 'encuestas'} de 10 segundos <span>Responder →</span>`, 'encuestas']
+            ].filter(Boolean);
+            banners.forEach(([html, seccion]) => {
+                const aviso = document.createElement('button');
+                aviso.className = 'vet-banner';
+                aviso.innerHTML = html;
+                aviso.addEventListener('click', () => { sessionStorage.setItem('arm_vet_seccion', seccion); irAPanel('panel-veterinaria'); });
+                const cab = el.querySelector('.dashboard-cabecera');
+                if (cab) cab.after(aviso); else el.prepend(aviso);
+            });
+        }
         if (!(resumen.clinicas || []).length) {
             const invita = document.createElement('button');
             invita.className = 'vet-banner vet-banner-suave';
@@ -509,7 +541,7 @@ const VetApp = (() => {
         };
 
         function conectar(raiz, lista, recargar) {
-            raiz.querySelectorAll('.vet-presu-pendiente').forEach((card) => {
+            raiz.querySelectorAll('.vet-presu-pendiente[data-presu]').forEach((card) => {
                 const p = lista.find((x) => x.id === card.dataset.presu);
                 const form = card.querySelector('.vet-presu-form');
                 const area = form.querySelector('textarea');
@@ -649,7 +681,7 @@ const CarpetaVet = (() => {
                     <div class="vet-resumen-grid">
                         <div class="vet-bloque">
                             <h4>📅 Próximos eventos</h4>
-                            ${lista([...(datos.citas || []).map((c) => ({ tipo: 'cita', titulo: `Hora: ${c.motivo || c.tipo}`, fecha: c.inicio, clinica: c.clinica, hora: true })),
+                            ${lista([...(datos.citas || []).map((c) => ({ tipo: 'cita', titulo: `Hora: ${c.motivo || c.tipo}${c.estado === 'solicitada' ? ' (esperando confirmación)' : ''}`, fecha: c.inicio, clinica: c.clinica, hora: true })),
                                 ...(datos.proximos || []).filter((p) => p.tipo !== 'cita')],
                                 (p) => `<li class="vet-proximo ${!p.hora && p.fecha < hoy ? 'atrasado' : ''}"><span>${h(p.titulo.replace(/^\S+\s/, ''))}</span><b>${p.hora ? fechaHora(p.fecha) : fecha(p.fecha)}${!p.hora && p.fecha < hoy ? ' · atrasado' : ''}</b></li>`,
                                 'Nada pendiente por ahora. 🎉')}
