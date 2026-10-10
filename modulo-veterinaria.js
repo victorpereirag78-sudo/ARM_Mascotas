@@ -786,7 +786,7 @@ const CarpetaVet = (() => {
             <div style="text-align:right"><b>RECETA MÉDICO VETERINARIA</b><br>N° ${h(r.folio)}<br>${fecha(r.fecha)}</div></div>
             <div class="g"><div><b>Paciente:</b> ${h(s.paciente && s.paciente.nombre)}<br>${h([s.paciente && s.paciente.especie, s.paciente && s.paciente.raza, s.paciente && s.paciente.edad].filter(Boolean).join(' · '))}</div>
             <div><b>Propietario/a:</b> ${h(s.cliente && s.cliente.nombre)}<br>${h(s.cliente && s.cliente.telefono || '')}</div></div>
-            <p class="rp">Rp.</p><ol>${(r.items || []).map((i) => `<li><b>${h(i.medicamento)}${i.presentacion ? ' — ' + h(i.presentacion) : ''}</b>${i.cantidad ? ' · Cant.: ' + h(i.cantidad) : ''}<br>
+            <p class="rp">Rp.</p><ol>${(r.items || []).map((i) => `<li><b>${h(i.medicamento)}${i.principio_activo ? ' (' + h(i.principio_activo) + ')' : ''}${i.presentacion ? ' — ' + h(i.presentacion) : ''}</b>${i.cantidad ? ' · Cant.: ' + h(i.cantidad) : ''}<br>
             ${h([i.dosis && 'Dosis: ' + i.dosis, i.via && 'Vía: ' + i.via, i.frecuencia && 'Frecuencia: ' + i.frecuencia, i.duracion && 'Duración: ' + i.duracion].filter(Boolean).join(' · '))}
             ${i.indicaciones ? '<br><span class="m">' + h(i.indicaciones) + '</span>' : ''}</li>`).join('')}</ol>
             ${r.indicaciones_generales ? `<p><b>Indicaciones:</b><br>${h(r.indicaciones_generales).replace(/\n/g, '<br>')}</p>` : ''}
