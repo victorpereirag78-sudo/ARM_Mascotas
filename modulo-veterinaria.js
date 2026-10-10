@@ -64,8 +64,10 @@ const VetApp = (() => {
         el.innerHTML = '<div class="estado-vacio"><p>Cargando...</p></div>';
         let clinicas = [];
         let notificaciones = [];
+        let presupuestos = [];
         try {
-            [clinicas, notificaciones] = await Promise.all([rpc('vet_app_mis_clinicas'), rpc('vet_app_notificaciones', { p_limite: 60 })]);
+            [clinicas, notificaciones, presupuestos] = await Promise.all([rpc('vet_app_mis_clinicas'), rpc('vet_app_notificaciones', { p_limite: 60 }),
+                rpc('vet_app_presupuestos').catch(() => [])]);
         } catch (e) {
             el.innerHTML = `<div class="estado-vacio"><p>No pudimos cargar la información de tu veterinaria: ${h(e.message)}</p></div>`;
             return;
@@ -74,6 +76,7 @@ const VetApp = (() => {
 
         el.innerHTML = `
             <div class="vet-panel">
+                ${presupuestos.length ? `<section class="card vet-seccion" id="vetPresupuestos">${Presupuestos.html(presupuestos)}</section>` : ''}
                 <section class="card vet-seccion" id="vetSeccionVincular"></section>
                 <section class="card vet-seccion">
                     <div class="vet-seccion-cabecera">
@@ -110,15 +113,23 @@ const VetApp = (() => {
                     li.classList.remove('no-leida');
                     actualizarInsignia();
                 }
-                if (li.dataset.mascota) abrirMascota(li.dataset.mascota);
+                if (li.dataset.presupuesto) Presupuestos.mostrar(el, li.dataset.presupuesto);
+                else if (li.dataset.mascota) abrirMascota(li.dataset.mascota);
             });
         });
+        Presupuestos.conectar(el, presupuestos, () => init(el));
+        // Llegó desde el push de un presupuesto: directo a la sección.
+        if (sessionStorage.getItem('arm_vet_seccion') === 'presupuestos') {
+            sessionStorage.removeItem('arm_vet_seccion');
+            Presupuestos.mostrar(el);
+        }
         actualizarInsignia();
     }
 
     function itemNotificacion(n) {
         return `
-            <li class="vet-notif ${n.leida ? '' : 'no-leida'}" data-id="${h(n.id)}" ${n.mascota_app_id ? `data-mascota="${h(n.mascota_app_id)}"` : ''}>
+            <li class="vet-notif ${n.leida ? '' : 'no-leida'}" data-id="${h(n.id)}" ${n.accion && n.accion.tipo === 'presupuesto' ? `data-presupuesto="${h(n.accion.id)}"`
+                : n.mascota_app_id ? `data-mascota="${h(n.mascota_app_id)}"` : ''}>
                 <div class="vet-notif-cuerpo">
                     <p class="vet-notif-titulo">${h(n.titulo)}</p>
                     ${n.mensaje ? `<p class="vet-notif-mensaje">${h(n.mensaje)}</p>` : ''}
@@ -314,6 +325,15 @@ const VetApp = (() => {
             const cab = el.querySelector('.dashboard-cabecera');
             if (cab) cab.after(aviso); else el.prepend(aviso);
         }
+        const porResponder = ((await rpc('vet_app_presupuestos').catch(() => [])) || []).filter((p) => p.estado === 'enviado');
+        if (porResponder.length) {
+            const aviso = document.createElement('button');
+            aviso.className = 'vet-banner';
+            aviso.innerHTML = `📝 Tienes <b>${porResponder.length}</b> ${porResponder.length === 1 ? 'presupuesto' : 'presupuestos'} de tu veterinaria por responder <span>Revisar →</span>`;
+            aviso.addEventListener('click', () => { sessionStorage.setItem('arm_vet_seccion', 'presupuestos'); irAPanel('panel-veterinaria'); });
+            const cab = el.querySelector('.dashboard-cabecera');
+            if (cab) cab.after(aviso); else el.prepend(aviso);
+        }
         if (!(resumen.clinicas || []).length) {
             const invita = document.createElement('button');
             invita.className = 'vet-banner vet-banner-suave';
@@ -406,6 +426,140 @@ const VetApp = (() => {
         });
         on('#vetPushDesactivar', async () => { await desactivarPush(); renderPush(el); });
     }
+
+    // ── Presupuestos: el dueño acepta, rechaza o pide cambios ────
+    const Presupuestos = (() => {
+        const pesos = (n) => '$' + Math.round(Number(n) || 0).toLocaleString('es-CL');
+        const ESTADOS = {
+            enviado: ['Por responder', 'vet-chip-aviso'],
+            aceptado: ['Aceptado · la clínica te espera', 'vet-chip-ok'],
+            cobrado: ['Pagado', 'vet-chip-ok'],
+            modificacion: ['Pediste cambios', 'vet-chip-aviso'],
+            rechazado: ['Rechazado', ''],
+            vencido: ['Vencido', '']
+        };
+        const chip = (e) => `<span class="vet-chip ${ESTADOS[e] ? ESTADOS[e][1] : ''}">${h(ESTADOS[e] ? ESTADOS[e][0] : e)}</span>`;
+
+        function detalle(p) {
+            return `
+                <ul class="vet-presu-items">
+                    ${p.items.map((i) => `<li><span>${Number(i.cantidad) !== 1 ? `${String(Number(i.cantidad)).replace('.', ',')} × ` : ''}${h(i.descripcion)}</span><b>${pesos(i.total)}</b></li>`).join('')}
+                </ul>
+                <div class="vet-presu-totales">
+                    ${Number(p.descuento) > 0 ? `<p><span>Descuento</span><span>−${pesos(p.descuento)}</span></p>` : ''}
+                    <p class="vet-presu-total"><span>Total (IVA incluido)</span><span>${pesos(p.total)}</span></p>
+                </div>
+                ${p.observaciones ? `<p class="vet-texto vet-presu-obs">📌 ${h(p.observaciones)}</p>` : ''}`;
+        }
+
+        function tarjetaPendiente(p) {
+            return `
+                <article class="vet-presu vet-presu-pendiente" data-presu="${h(p.id)}">
+                    <div class="vet-presu-cabecera">
+                        <span class="vet-preview-emoji">${h(p.emoji)}</span>
+                        <div><h4>${h(p.titulo)}</h4>
+                            <p>${h(p.mascota)} · ${h(p.clinica)}${p.sucursal ? ` (${h(p.sucursal)})` : ''}${p.veterinario ? ` · ${h(p.veterinario)}` : ''}</p></div>
+                        ${chip(p.estado)}
+                    </div>
+                    ${detalle(p)}
+                    <p class="vet-nota">Presupuesto N° ${h(p.folio)} · válido hasta el ${fecha(p.valido_hasta)}</p>
+                    <div class="vet-presu-acciones">
+                        <button class="btn-primario btn-ancho-auto" data-accion="aceptado">✅ Aceptar</button>
+                        <button class="btn-secundario btn-chico" data-accion="modificacion">✏️ Pedir cambios</button>
+                        <button class="btn-secundario btn-chico" data-accion="rechazado">Rechazar</button>
+                    </div>
+                    <div class="vet-presu-form" hidden>
+                        <div class="input-wrap"><textarea rows="3" maxlength="1000" placeholder=""></textarea></div>
+                        <div class="vet-presu-acciones">
+                            <button class="btn-secundario btn-chico" data-cancelar>Volver</button>
+                            <button class="btn-primario btn-ancho-auto" data-confirmar></button>
+                        </div>
+                    </div>
+                    <p class="field-msg"></p>
+                </article>`;
+        }
+
+        function itemHistorial(p) {
+            return `
+                <li class="vet-presu vet-presu-hist" data-presu="${h(p.id)}">
+                    <details>
+                        <summary><span><b>${h(p.titulo)}</b><small>${h(p.mascota)} · ${h(p.clinica)} · ${pesos(p.total)}</small></span>${chip(p.estado)}</summary>
+                        ${detalle(p)}
+                        ${p.respuesta_comentario ? `<p class="vet-nota">Tu comentario: “${h(p.respuesta_comentario)}”</p>` : ''}
+                        ${p.estado === 'aceptado' ? `<p class="vet-nota">Lo aceptaste el ${fecha(p.respondido_en)}. ${p.clinica_telefono ? `Para agendar: <a href="tel:${h(p.clinica_telefono)}">${h(p.clinica_telefono)}</a>` : ''}</p>` : ''}
+                        ${p.estado === 'modificacion' ? '<p class="vet-nota">La clínica te enviará una versión nueva.</p>' : ''}
+                    </details>
+                </li>`;
+        }
+
+        function html(lista) {
+            const pendientes = lista.filter((p) => p.estado === 'enviado');
+            const resto = lista.filter((p) => p.estado !== 'enviado');
+            return `
+                <div class="vet-seccion-cabecera"><h3>📝 Presupuestos${pendientes.length ? ` <span class="vet-insignia vet-insignia-inline">${pendientes.length}</span>` : ''}</h3></div>
+                ${pendientes.length ? `<p class="vet-texto">Revisa el detalle y responde aquí mismo. Si aceptas, la clínica lo deja listo para la atención.</p>
+                    <div class="vet-presu-lista">${pendientes.map(tarjetaPendiente).join('')}</div>` : ''}
+                ${resto.length ? `<ul class="vet-presu-historial">${resto.map(itemHistorial).join('')}</ul>` : ''}`;
+        }
+
+        const TEXTOS = {
+            aceptado: { placeholder: 'Comentario para la clínica (opcional)', boton: 'Confirmar: acepto el presupuesto' },
+            modificacion: { placeholder: '¿Qué te gustaría cambiar? Ej: sin la radiografía, otra fecha…', boton: 'Enviar cambios' },
+            rechazado: { placeholder: 'Si quieres, cuéntanos por qué (opcional)', boton: 'Rechazar presupuesto' }
+        };
+
+        function conectar(raiz, lista, recargar) {
+            raiz.querySelectorAll('.vet-presu-pendiente').forEach((card) => {
+                const p = lista.find((x) => x.id === card.dataset.presu);
+                const form = card.querySelector('.vet-presu-form');
+                const area = form.querySelector('textarea');
+                const ok = form.querySelector('[data-confirmar]');
+                const msg = card.querySelector('.field-msg');
+                let respuesta = null;
+                card.querySelectorAll('[data-accion]').forEach((b) => b.addEventListener('click', () => {
+                    respuesta = b.dataset.accion;
+                    area.placeholder = TEXTOS[respuesta].placeholder;
+                    ok.textContent = TEXTOS[respuesta].boton;
+                    ok.className = respuesta === 'rechazado' ? 'btn-peligro btn-ancho-auto' : 'btn-primario btn-ancho-auto';
+                    form.hidden = false;
+                    card.querySelector('.vet-presu-acciones').hidden = true;
+                    area.focus();
+                }));
+                form.querySelector('[data-cancelar]').addEventListener('click', () => {
+                    form.hidden = true; card.querySelector('.vet-presu-acciones').hidden = false; msg.textContent = '';
+                });
+                ok.addEventListener('click', async () => {
+                    const comentario = area.value.trim();
+                    if (respuesta === 'modificacion' && comentario.length < 3) {
+                        msg.textContent = 'Cuéntanos qué te gustaría cambiar.'; msg.className = 'field-msg msg-error'; return;
+                    }
+                    Utils.setLoading(ok, true, 'Enviando...');
+                    try {
+                        await rpc('vet_app_responder_presupuesto', { p_id: p.id, p_respuesta: respuesta, p_comentario: comentario || null, p_version: p.version });
+                        Utils.toast(respuesta === 'aceptado' ? `¡Listo! ${p.clinica} ya sabe que aceptaste.`
+                            : respuesta === 'modificacion' ? 'Enviamos tus cambios a la clínica.' : 'Le avisamos a la clínica.', 'exito');
+                        await recargar();
+                    } catch (e) {
+                        Utils.setLoading(ok, false);
+                        msg.textContent = e.message; msg.className = 'field-msg msg-error';
+                    }
+                });
+            });
+        }
+
+        // Lleva la vista a la sección (o a un presupuesto) y lo resalta.
+        function mostrar(raiz, id) {
+            const destino = (id && raiz.querySelector(`[data-presu="${id}"]`)) || raiz.querySelector('#vetPresupuestos');
+            if (!destino) return;
+            const det = destino.querySelector('details');
+            if (det) det.open = true;
+            destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            destino.classList.add('vet-resaltado');
+            setTimeout(() => destino.classList.remove('vet-resaltado'), 1800);
+        }
+
+        return { html, conectar, mostrar };
+    })();
 
     return {
         init, renderVinculacion, ofrecerEnCuentaPendiente, decorarDashboard, actualizarInsignia, escucharEnVivo,
