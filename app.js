@@ -3,15 +3,28 @@
 // Depende de: config.js, utils.js, auth.js, modulo-*.js
 // ================================================================
 
+// Íconos de línea (24x24, trazo currentColor): heredan el color del ítem
+// activo/inactivo y se ven igual en claro y oscuro.
+const ICONOS_NAV = {
+    "home": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5\"/></svg>",
+    "paw": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle class=\"relleno\" cx=\"5.5\" cy=\"11\" r=\"1.7\"/><circle class=\"relleno\" cx=\"18.5\" cy=\"11\" r=\"1.7\"/><circle class=\"relleno\" cx=\"9.2\" cy=\"6.2\" r=\"1.8\"/><circle class=\"relleno\" cx=\"14.8\" cy=\"6.2\" r=\"1.8\"/><path d=\"M12 11.5c-3.2 0-6 3.1-6 5.6 0 1.8 1.5 2.9 3.1 2.9 1.2 0 1.8-.7 2.9-.7s1.7.7 2.9.7c1.6 0 3.1-1.1 3.1-2.9 0-2.5-2.8-5.6-6-5.6z\"/></svg>",
+    "clinica": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 21V8.5L12 3l8 5.5V21\"/><path d=\"M2.5 21h19\"/><path d=\"M12 10.5v5M9.5 13h5\"/></svg>",
+    "agenda": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4.5\" width=\"18\" height=\"16.5\" rx=\"2.5\"/><path d=\"M3 9.5h18M8 3v3M16 3v3\"/></svg>",
+    "perfil": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7\"/></svg>",
+    "compartir": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6\"/><path d=\"M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.5c2.2.6 3.5 2.5 3.5 5.5\"/></svg>",
+    "pacientes": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M11 2v2M5 2v2M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/><path d=\"M8 15a6 6 0 0 0 12 0v-3\"/><circle cx=\"20\" cy=\"10\" r=\"2\"/></svg>",
+    "admin": "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3 4.5 6v5.5c0 4.6 3.1 8.1 7.5 9.5 4.4-1.4 7.5-4.9 7.5-9.5V6z\"/><path d=\"m9 12 2 2 4-4\"/></svg>"
+};
+
 const PANELES = [
-    { id: 'panel-dashboard', icono: '🏠', etiqueta: 'Dashboard', modulo: () => window.Dashboard },
-    { id: 'panel-mascotas', icono: '🐾', etiqueta: 'Mis mascotas', modulo: () => window.Mascota },
-    { id: 'panel-veterinaria', icono: '🏥', etiqueta: 'Mi veterinaria', modulo: () => window.VetApp },
-    { id: 'panel-agenda', icono: '🗓️', etiqueta: 'Agenda', modulo: () => window.Agenda },
-    { id: 'panel-perfil', icono: '👤', etiqueta: 'Mi perfil', modulo: () => window.Perfil },
-    { id: 'panel-compartir', icono: '🤝', etiqueta: 'Compartir', modulo: () => window.Compartir },
-    { id: 'panel-veterinario', icono: '🩺', etiqueta: 'Mis pacientes', modulo: () => window.Veterinario },
-    { id: 'panel-admin', icono: '🛡️', etiqueta: 'Administración', modulo: () => window.Admin }
+    { id: 'panel-dashboard', icono: ICONOS_NAV.home, etiqueta: 'Dashboard', corta: 'Inicio', modulo: () => window.Dashboard },
+    { id: 'panel-mascotas', icono: ICONOS_NAV.paw, etiqueta: 'Mis mascotas', corta: 'Mascotas', modulo: () => window.Mascota },
+    { id: 'panel-veterinaria', icono: ICONOS_NAV.clinica, etiqueta: 'Mi veterinaria', corta: 'Veterinaria', modulo: () => window.VetApp },
+    { id: 'panel-agenda', icono: ICONOS_NAV.agenda, etiqueta: 'Agenda', modulo: () => window.Agenda },
+    { id: 'panel-perfil', icono: ICONOS_NAV.perfil, etiqueta: 'Mi perfil', corta: 'Perfil', modulo: () => window.Perfil },
+    { id: 'panel-compartir', icono: ICONOS_NAV.compartir, etiqueta: 'Compartir', modulo: () => window.Compartir },
+    { id: 'panel-veterinario', icono: ICONOS_NAV.pacientes, etiqueta: 'Mis pacientes', corta: 'Pacientes', modulo: () => window.Veterinario },
+    { id: 'panel-admin', icono: ICONOS_NAV.admin, etiqueta: 'Administración', corta: 'Admin', modulo: () => window.Admin }
 ];
 
 const MENSAJES_CUENTA_BLOQUEADA = {
@@ -121,7 +134,7 @@ function construirMenu() {
         const btnMovil = document.createElement('button');
         btnMovil.className = 'bottom-nav-item';
         btnMovil.dataset.panel = p.id;
-        btnMovil.innerHTML = `<span class="nav-icono">${p.icono}</span><span>${p.etiqueta}</span>`;
+        btnMovil.innerHTML = `<span class="nav-icono">${p.icono}</span><span>${p.corta || p.etiqueta}</span>`;
         btnMovil.addEventListener('click', () => irAPanel(p.id));
         bottomNav.appendChild(btnMovil);
     });

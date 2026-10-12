@@ -22,7 +22,7 @@
     cursor: pointer;
     white-space: nowrap;
 }
-.historial-tab.activo { background: var(--color-primario); color: #fff; border-color: var(--color-primario); }
+.historial-tab.activo { background: var(--color-primario-oscuro); color: #fff; border-color: var(--color-primario-oscuro); }
 
 .historial-panel { max-width: 760px; }
 
@@ -58,7 +58,7 @@
 .gasto-barras { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
 .gasto-barra-fila { display: grid; grid-template-columns: 100px 1fr 80px; align-items: center; gap: 10px; font-size: 12px; }
 .gasto-barra-track { height: 8px; background: var(--color-fondo); border-radius: 999px; overflow: hidden; }
-.gasto-barra-fill { height: 100%; background: var(--color-primario); border-radius: 999px; }
+.gasto-barra-fill { height: 100%; background: var(--degradado); border-radius: 999px; }
 .gasto-barra-monto { text-align: right; color: var(--color-texto-suave); }
 
 /* ── Gráfico de evolución ─────────────────────────────────────── */

@@ -64,7 +64,7 @@ body { background: var(--color-fondo); }
     font-weight: 700;
     font-size: 13px;
 }
-.sos-publico-contactar .btn-primario { background: var(--color-primario); color: #fff; }
+.sos-publico-contactar .btn-primario { background: var(--color-primario-oscuro); color: #fff; }
 .sos-publico-contactar .btn-secundario { background: #25d366; color: #fff; }
 
 .sos-publico-fila {
@@ -81,3 +81,6 @@ body { background: var(--color-fondo); }
 .sos-publico-nota { margin: 20px 0 0; font-size: 12px; color: var(--color-texto-suave); }
 
 .sos-publico-marca { font-size: 13px; color: var(--color-texto-suave); font-weight: 600; }
+
+.sos-publico-marca { display: inline-flex; align-items: center; gap: 8px; }
+.sos-publico-marca .marca-mini { width: 20px; height: 20px; border-radius: 6px; }

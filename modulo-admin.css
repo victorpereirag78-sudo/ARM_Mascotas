@@ -18,7 +18,7 @@
     font-weight: 600;
     cursor: pointer;
 }
-.admin-tab.activo { background: var(--color-primario); color: #fff; border-color: var(--color-primario); }
+.admin-tab.activo { background: var(--color-primario-oscuro); color: #fff; border-color: var(--color-primario-oscuro); }
 
 .admin-lista { max-width: 760px; }
 

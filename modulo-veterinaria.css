@@ -82,7 +82,7 @@
 .vet-tab { flex-shrink: 0; border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); border-radius: 999px;
     padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .vet-tab span { opacity: .6; font-weight: 500; }
-.vet-tab.activa { background: var(--color-primario); border-color: var(--color-primario); color: #fff; }
+.vet-tab.activa { background: var(--color-primario-oscuro); border-color: var(--color-primario-oscuro); color: #fff; }
 .vet-tab.activa span { opacity: .85; }
 .vet-tab-cuerpo { margin-top: 12px; }
 .vet-alerta { padding: 10px 14px; border-radius: 12px; background: color-mix(in srgb, var(--color-error) 10%, transparent); color: var(--color-error); font-size: 14px; margin-bottom: 12px; }
@@ -188,7 +188,7 @@
 .vet-opcion { border: 1px solid var(--color-borde); border-radius: 12px; padding: 10px 14px; background: var(--color-superficie); color: var(--color-texto);
     font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
 .vet-opcion small { display: block; font-weight: 400; font-size: 11px; color: var(--color-texto-suave); }
-.vet-opcion.activo, .vet-dia.activo, .vet-hora.activo { border-color: var(--color-primario); background: var(--color-primario); color: #fff; }
+.vet-opcion.activo, .vet-dia.activo, .vet-hora.activo { border-color: var(--color-primario-oscuro); background: var(--color-primario-oscuro); color: #fff; }
 .vet-opcion.activo small, .vet-dia.activo small { color: rgba(255, 255, 255, .85); }
 .vet-dias { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
 .vet-dia { flex-shrink: 0; border: 1px solid var(--color-borde); border-radius: 12px; padding: 8px 12px; background: var(--color-superficie); color: var(--color-texto);

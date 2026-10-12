@@ -14,7 +14,7 @@
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: var(--color-primario);
+    background: var(--degradado);
     color: #fff;
     display: flex;
     align-items: center;

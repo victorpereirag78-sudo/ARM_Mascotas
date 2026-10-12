@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v9';
+const CACHE_NAME = 'arm-mascotas-v10';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -72,7 +72,12 @@ const ARCHIVOS_SHELL = [
     '/manifest.json',
     '/icons/icon-192.svg',
     '/icons/icon-512.svg',
-    '/icons/icon-maskable.svg'
+    '/icons/icon-maskable.svg',
+    '/icons/logo.svg',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
+    '/icons/icon-maskable-512.png',
+    '/icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (evento) => {
@@ -156,8 +161,8 @@ self.addEventListener('push', (evento) => {
     evento.waitUntil(
         self.registration.showNotification(d.title || 'ARM Mascotas', {
             body: d.body || '',
-            icon: '/icons/icon-192.svg',
-            badge: '/icons/icon-192.svg',
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
             tag: d.tag || undefined,
             data: { url: d.url || '/app.html?vet=notificaciones' }
         })

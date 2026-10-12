@@ -48,3 +48,10 @@
     gap: 12px;
     flex-wrap: wrap;
 }
+
+/* ── Pulido visual ───────────────────────────────────────────── */
+.mascota-card { box-shadow: var(--sombra-sm); transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+.mascota-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); border-color: color-mix(in srgb, var(--color-primario) 40%, var(--color-borde)); }
+.mascota-card-foto { background: linear-gradient(160deg, color-mix(in srgb, var(--color-primario) 10%, var(--color-fondo)), color-mix(in srgb, var(--color-secundario) 12%, var(--color-fondo))); }
+.mascota-card-info h3 { font-size: 17px; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .mascota-card:hover { transform: none; } }
