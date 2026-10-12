@@ -322,6 +322,7 @@ const VetApp = (() => {
         let resumen;
         try { resumen = await rpc('vet_app_resumen'); } catch (_e) { return; }
         if (!resumen) return;
+        window.appData.vetResumen = resumen; // lo usan los accesos directos del inicio
         (resumen.mascotas || []).forEach((m) => {
             const card = el.querySelector(`.dashboard-card[data-id="${m.mascota_app_id}"]`);
             if (!card) return;
@@ -618,9 +619,9 @@ const CarpetaVet = (() => {
         ['hospitalizaciones', '🛏️ Hospitalización'], ['documentos', '📎 Documentos'], ['pesos', '⚖️ Peso'], ['gastos', '💰 Gastos']
     ];
 
-    async function init(el, mascota) {
+    async function init(el, mascota, pestanaInicial) {
         raiz = el;
-        pestana = 'resumen';
+        pestana = PESTANAS.some(([k]) => k === pestanaInicial) ? pestanaInicial : 'resumen';
         el.innerHTML = '<p class="vet-vacio">Cargando la carpeta médica...</p>';
         try {
             const [historial, planes] = await Promise.all([
@@ -647,14 +648,18 @@ const CarpetaVet = (() => {
     }
 
     function render() {
-        const visibles = PESTANAS.filter(([k]) => k === 'resumen' || (k === 'gastos' ? !!datos.gastos : cuenta(k) > 0));
+        // La pestaña pedida desde un acceso directo se muestra aunque esté vacía.
+        const visibles = PESTANAS.filter(([k]) => k === 'resumen' || k === pestana || (k === 'gastos' ? !!datos.gastos : cuenta(k) > 0));
+        const sinDatos = pestana !== 'resumen' && pestana !== 'gastos' && cuenta(pestana) === 0;
         raiz.innerHTML = `
             <div class="vet-carpeta">
                 <p class="vet-carpeta-origen">Información registrada por ${datos.clinicas.map((c) => `<b>${h(c.clinica)}</b>`).join(', ')} · solo lectura</p>
                 <div class="vet-tabs" role="tablist">
                     ${visibles.map(([k, t]) => `<button role="tab" class="vet-tab ${k === pestana ? 'activa' : ''}" data-tab="${k}">${t}${k !== 'resumen' && k !== 'gastos' ? ` <span>${cuenta(k)}</span>` : ''}</button>`).join('')}
                 </div>
-                <div class="vet-tab-cuerpo">${contenido()}</div>
+                <div class="vet-tab-cuerpo">${sinDatos
+                    ? `<p class="vet-vacio">Tu veterinaria todavía no ha registrado ${h((PESTANAS.find(([k]) => k === pestana) || ['', ''])[1].replace(/^\S+\s/, '').toLowerCase())} de ${h(datos.mascota.nombre)}.</p>`
+                    : contenido()}</div>
             </div>`;
         raiz.querySelectorAll('.vet-tab').forEach((b) => b.addEventListener('click', () => { pestana = b.dataset.tab; render(); }));
         raiz.querySelectorAll('[data-doc]').forEach((b) => b.addEventListener('click', () => abrirDocumento(b.dataset.doc)));

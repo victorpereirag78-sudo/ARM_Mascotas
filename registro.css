@@ -25,3 +25,9 @@
     padding: 10px 14px;
     margin: 8px 0 20px;
 }
+
+/* Aceptación de términos y política de privacidad */
+.registro-acepto { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0 4px; font-size: 13px; line-height: 1.5; color: var(--color-texto-suave); cursor: pointer; }
+.registro-acepto input { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: var(--color-primario-oscuro); }
+.registro-acepto a { color: var(--color-primario-oscuro); font-weight: 600; }
+:root[data-theme="dark"] .registro-acepto a { color: var(--color-primario); }

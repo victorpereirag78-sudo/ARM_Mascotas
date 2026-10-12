@@ -94,7 +94,10 @@ const MENSAJES_CUENTA_BLOQUEADA = {
     const panelInicial = (quiereVet && Auth.puedeAcceder('panel-veterinaria'))
         ? PANELES.find((p) => p.id === (parametros.get('mascota') ? 'panel-mascotas' : 'panel-veterinaria'))
         : (PANELES.find((p) => Auth.puedeAcceder(p.id)) || PANELES[0]);
-    irAPanel(panelInicial.id);
+    irAPanel(panelInicial.id).then(() => {
+        // Primer ingreso: recorrido de bienvenida sobre el inicio.
+        if (panelInicial.id === 'panel-dashboard' && window.Tutorial) Tutorial.iniciarSiCorresponde();
+    });
     if (Auth.puedeAcceder('panel-veterinaria')) {
         VetApp.actualizarInsignia();
         VetApp.escucharEnVivo();

@@ -72,8 +72,18 @@ const Dashboard = (() => {
         }
 
         const puedeVet = Auth.puedeAcceder('panel-veterinaria');
+        const acceso = (ir, icono, texto) => `<button class="acceso-rapido" data-ir="${ir}"><span>${icono}</span>${texto}</button>`;
         return `
             ${saludo}
+            <nav class="accesos-inicio" id="dashAccesos" aria-label="Accesos directos">
+                ${puedeVet ? acceso('reservar', '📅', 'Agendar hora') + acceso('horas', '🗓️', 'Mis horas') : ''}
+                ${acceso('resultados', '🧪', 'Resultados')}
+                ${acceso('recetas', '📄', 'Recetas')}
+                ${acceso('historia', '🩺', 'Historia clínica')}
+                ${acceso('vacunas', '💉', 'Vacunas')}
+                ${acceso('agenda', '⏰', 'Recordatorio')}
+                ${acceso('compartir', '👪', 'Compartir')}
+            </nav>
             <div class="layout-lateral dashboard-layout">
                 <div class="dashboard-principal">
                     <h3 class="titulo-bloque">${mascotas.length === 1 ? 'Mi mascota' : `Mis mascotas <small>${mascotas.length}</small>`}
@@ -84,15 +94,6 @@ const Dashboard = (() => {
                     <section class="card dashboard-proximos">
                         <h3 class="titulo-bloque">🗓️ Próximos <button class="enlace-accion" id="btnIrAgenda">Ver agenda</button></h3>
                         <div id="dashProximos"><p class="dashboard-nota">Cargando...</p></div>
-                    </section>
-                    <section class="card dashboard-accesos">
-                        <h3 class="titulo-bloque">Accesos rápidos</h3>
-                        <div class="dashboard-accesos-grid">
-                            ${puedeVet ? '<button class="acceso-rapido" data-ir="reservar"><span>📅</span>Reservar hora</button>' : ''}
-                            <button class="acceso-rapido" data-ir="agenda"><span>⏰</span>Nuevo recordatorio</button>
-                            ${puedeVet ? '<button class="acceso-rapido" data-ir="veterinaria"><span>🏥</span>Mi veterinaria</button>' : ''}
-                            <button class="acceso-rapido" data-ir="compartir"><span>👪</span>Compartir con mi familia</button>
-                        </div>
                     </section>
                 </aside>
             </div>`;
@@ -178,13 +179,64 @@ const Dashboard = (() => {
             });
         });
 
-        el.querySelectorAll('.acceso-rapido').forEach((btn) => btn.addEventListener('click', () => {
-            const ir = btn.dataset.ir;
-            if (ir === 'reservar') { sessionStorage.setItem('arm_vet_seccion', 'reservar'); irAPanel('panel-veterinaria'); }
-            else if (ir === 'veterinaria') irAPanel('panel-veterinaria');
-            else if (ir === 'agenda') irAPanel('panel-agenda');
-            else if (ir === 'compartir') irAPanel('panel-compartir');
+        el.querySelectorAll('.acceso-rapido').forEach((btn) => btn.addEventListener('click', () => irAcceso(btn.dataset.ir, el)));
+    }
+
+    // Resultados, recetas, historia clínica y vacunas abren la ficha de la
+    // mascota en la carpeta de su veterinaria (o, sin clínica conectada,
+    // en lo que registró el dueño).
+    const SECCION_FICHA = {
+        resultados: { vet: 'examenes', propio: null },
+        recetas: { vet: 'recetas', propio: null },
+        historia: { vet: 'consultas', propio: 'consultas' },
+        vacunas: { vet: 'vacunas', propio: 'vacunas' }
+    };
+
+    function irAcceso(ir, el) {
+        if (ir === 'reservar' || ir === 'horas') {
+            sessionStorage.setItem('arm_vet_seccion', ir === 'reservar' ? 'reservar' : 'citas');
+            return irAPanel('panel-veterinaria');
+        }
+        if (ir === 'agenda') return irAPanel('panel-agenda');
+        if (ir === 'compartir') return irAPanel('panel-compartir');
+        const destino = SECCION_FICHA[ir];
+        if (!destino) return;
+        const mascotas = window.appData.mascotas || [];
+        const abrir = (m) => {
+            const conClinica = ((window.appData.vetResumen && window.appData.vetResumen.mascotas) || []).some((x) => x.mascota_app_id === m.id);
+            const usarPropio = !conClinica && destino.propio;
+            sessionStorage.setItem('arm_abrir_mascota', m.id);
+            sessionStorage.setItem('arm_abrir_pestana', usarPropio ? 'salud' : 'veterinaria');
+            sessionStorage.setItem('arm_abrir_sub', usarPropio ? destino.propio : destino.vet);
+            irAPanel('panel-mascotas');
+        };
+        if (mascotas.length === 1) return abrir(mascotas[0]);
+        elegirMascota(el, mascotas, abrir);
+    }
+
+    // Con varias mascotas, pregunta de cuál.
+    function elegirMascota(el, mascotas, alElegir) {
+        const capa = document.createElement('div');
+        capa.className = 'elegir-mascota';
+        capa.innerHTML = `
+            <div class="elegir-mascota-card" role="dialog" aria-modal="true" aria-label="Elige una mascota">
+                <h3>¿De qué mascota?</h3>
+                <div class="elegir-mascota-lista">
+                    ${mascotas.map((m) => `<button type="button" data-id="${m.id}">
+                        <span class="elegir-mascota-foto">${m.foto_url ? `<img src="${m.foto_url}" alt="">` : (m.especie === 'gato' ? '🐱' : m.especie === 'perro' ? '🐶' : '🐾')}</span>
+                        ${esc(m.nombre)}</button>`).join('')}
+                </div>
+                <button type="button" class="btn-secundario elegir-mascota-cancelar">Cancelar</button>
+            </div>`;
+        const cerrar = () => capa.remove();
+        capa.addEventListener('click', (e) => { if (e.target === capa) cerrar(); });
+        capa.querySelector('.elegir-mascota-cancelar').addEventListener('click', cerrar);
+        capa.querySelectorAll('[data-id]').forEach((b) => b.addEventListener('click', () => {
+            cerrar();
+            alElegir(mascotas.find((m) => m.id === b.dataset.id));
         }));
+        document.body.appendChild(capa);
+        capa.querySelector('[data-id]').focus();
     }
 
     function textoPendiente(fechaISO) {

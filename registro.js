@@ -28,6 +28,7 @@
         if (password.length < 6) { mostrarError('errPassword', 'Mínimo 6 caracteres.'); valido = false; }
         if (!nombre) { mostrarError('errNombre', 'Campo requerido.'); valido = false; }
         if (!apellido) { mostrarError('errApellido', 'Campo requerido.'); valido = false; }
+        if (!document.getElementById('aceptaTerminos').checked) { mostrarError('errTerminos', 'Para crear la cuenta debes aceptar los términos y la política de privacidad.'); valido = false; }
         if (!valido) return;
 
         Utils.setLoading(btnRegistrar, true, 'Creando cuenta...');

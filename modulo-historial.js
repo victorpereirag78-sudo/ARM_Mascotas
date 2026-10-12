@@ -42,10 +42,10 @@ const Historial = (() => {
     let tabActiva = 'vacunas';
     let datos = {};
 
-    async function init(el, idMascota) {
+    async function init(el, idMascota, tabInicial) {
         contenedor = el;
         mascotaId = idMascota;
-        tabActiva = 'vacunas';
+        tabActiva = TABS.some((t) => t.id === tabInicial) ? tabInicial : 'vacunas';
         contenedor.innerHTML = `<div class="estado-vacio"><p>Cargando historial...</p></div>`;
         await cargarTodo();
         render();

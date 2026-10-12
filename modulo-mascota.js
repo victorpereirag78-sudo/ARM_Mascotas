@@ -16,6 +16,7 @@ const Mascota = (() => {
     let contenedorActual = null;
     let pestana = 'salud';
     let montadas = new Set();
+    let subPedida = null;      // subsección a abrir (ej. 'recetas' de la carpeta), desde los accesos del inicio
 
     const PESTANAS = [
         ['salud', '🩺 Salud'],
@@ -35,11 +36,12 @@ const Mascota = (() => {
         // directo esa mascota (el aviso abre la pestaña de la veterinaria).
         const abrir = sessionStorage.getItem('arm_abrir_mascota');
         const desdeVet = sessionStorage.getItem('arm_abrir_mascota_vet');
-        sessionStorage.removeItem('arm_abrir_mascota');
-        sessionStorage.removeItem('arm_abrir_mascota_vet');
+        const pestanaPedida = sessionStorage.getItem('arm_abrir_pestana');
+        subPedida = sessionStorage.getItem('arm_abrir_sub');
+        ['arm_abrir_mascota', 'arm_abrir_mascota_vet', 'arm_abrir_pestana', 'arm_abrir_sub'].forEach((k) => sessionStorage.removeItem(k));
         if (abrir) {
             const m = (window.appData.mascotas || []).find((x) => x.id === abrir);
-            if (m) abrirFicha(m, desdeVet ? 'veterinaria' : 'salud');
+            if (m) abrirFicha(m, pestanaPedida || (desdeVet ? 'veterinaria' : 'salud'));
             else render();
             return;
         }
@@ -224,8 +226,10 @@ const Mascota = (() => {
         if (unaVez && montadas.has(clave)) return;
         montadas.add(clave);
         const $ = (id) => document.getElementById(id);
-        if (clave === 'salud' && $('historialContenedor')) Historial.init($('historialContenedor'), editando.id);
-        if (clave === 'veterinaria' && $('carpetaVetContenedor') && window.CarpetaVet) CarpetaVet.init($('carpetaVetContenedor'), editando);
+        const sub = subPedida;
+        subPedida = null;
+        if (clave === 'salud' && $('historialContenedor')) Historial.init($('historialContenedor'), editando.id, sub);
+        if (clave === 'veterinaria' && $('carpetaVetContenedor') && window.CarpetaVet) CarpetaVet.init($('carpetaVetContenedor'), editando, sub);
         if (clave === 'sos') {
             if ($('qrContenedor')) QR.init($('qrContenedor'), editando);
             if ($('perdidaContenedor')) Perdida.init($('perdidaContenedor'), editando);

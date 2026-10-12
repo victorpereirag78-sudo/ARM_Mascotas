@@ -12,6 +12,12 @@ const Perfil = (() => {
 
         document.getElementById('inputFotoPerfil').addEventListener('change', subirFoto);
         document.getElementById('formPerfil').addEventListener('submit', guardar);
+        const btnTutorial = document.getElementById('btnVerTutorial');
+        if (btnTutorial) btnTutorial.addEventListener('click', async () => {
+            await irAPanel('panel-dashboard');
+            window.scrollTo({ top: 0 });
+            setTimeout(() => window.Tutorial && Tutorial.iniciar(), 500);
+        });
     }
 
     function plantilla(p) {
@@ -99,8 +105,45 @@ const Perfil = (() => {
                     <div class="field-msg" id="perfilMensaje"></div>
                     <button type="submit" class="btn-primario btn-ancho-auto" id="btnGuardarPerfil">Guardar cambios</button>
                 </form>
+
+                ${plantillaAyuda()}
             </div>
         `;
+    }
+
+    // ── Ayuda: preguntas frecuentes, tutorial y documentos legales ──
+    const PREGUNTAS = [
+        ['¿Cómo conecto mi veterinaria?', 'Si tu veterinaria usa ARM Veterinaria, te entregará un código de 8 caracteres o un enlace. Entra a <b>Mi veterinaria</b>, ingresa el código y elige a qué mascota corresponde cada paciente. Desde ese momento verás su carpeta médica.'],
+        ['Mi veterinaria no usa ARM Veterinaria, ¿me sirve la app?', 'Sí. Puedes llevar tú la historia de vida completa: vacunas, consultas, medicamentos, alimentación, gastos y diario, además de la agenda, la ficha SOS con código QR y el pasaporte.'],
+        ['¿Cómo reservo o confirmo una hora?', 'En <b>Mi veterinaria → Mis horas</b> toca <b>Reservar hora</b> (si tu clínica tiene reservas en línea). Cuando la clínica te agenda una hora, aparece el botón <b>Confirmar asistencia</b>. También puedes cancelar con la anticipación que pida la clínica.'],
+        ['¿Qué información ve mi veterinaria?', 'La clínica conectada ve tus datos de cliente y la ficha clínica que ella misma registra. Lo que anotas tú en <b>Salud</b> solo lo ven las personas y los veterinarios que autorices desde la ficha de cada mascota.'],
+        ['¿Para qué sirve el código QR?', 'Para la placa del collar. Quien encuentre a tu mascota lo escanea con la cámara y ve una ficha de emergencia con solo lo que tú autorices: alergias, medicamentos, tu teléfono o un contacto. Se configura en la ficha → <b>SOS y QR</b>.'],
+        ['Mi mascota se perdió, ¿qué hago?', 'Abre su ficha → <b>SOS y QR</b> → <b>Marcar como perdida</b> y registra dónde la viste por última vez. Su ficha pública mostrará el aviso para que quien la encuentre te contacte. Cuando aparezca, márcala como encontrada.'],
+        ['¿Cómo comparto a mi mascota con mi familia?', 'En <b>Compartir</b> escribe el correo de la persona y elige si solo puede ver o también editar. Ella acepta la invitación desde su propia cuenta de ARM Mascotas.'],
+        ['¿Cómo instalo la app en mi teléfono?', 'Toca <b>Instalar app</b> en el menú o abre <a href="/instalar.html">la guía de instalación</a>. Queda en tu pantalla de inicio como cualquier app, sin pasar por una tienda.'],
+        ['No me llegan las notificaciones', 'Actívalas en <b>Mi veterinaria → Avisos de tu veterinaria</b> y acepta el permiso del navegador. En iPhone, primero instala la app en la pantalla de inicio y ábrela desde ahí.'],
+        ['¿Cómo corrijo o elimino mis datos?', 'Tus datos y los de cada mascota los editas aquí y en cada ficha. Para lo que guarda una clínica, usa <b>Mi veterinaria → Tus datos personales</b>. Para cerrar tu cuenta, revisa la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.'],
+        ['¿La app tiene costo?', 'No. ARM Mascotas es gratis para los dueños de mascotas.']
+    ];
+
+    function plantillaAyuda() {
+        return `
+            <section class="card perfil-ayuda" id="perfilAyuda">
+                <div class="perfil-ayuda-cabecera">
+                    <div>
+                        <h3>❓ Ayuda y preguntas frecuentes</h3>
+                        <p>Respuestas rápidas sobre cómo usar ARM Mascotas.</p>
+                    </div>
+                    <div class="perfil-ayuda-acciones">
+                        <button type="button" class="btn-secundario" id="btnVerTutorial">▶ Ver tutorial</button>
+                        <a class="btn-secundario" href="/privacidad.html" target="_blank" rel="noopener">🔒 Privacidad</a>
+                        <a class="btn-secundario" href="/terminos.html" target="_blank" rel="noopener">📄 Términos</a>
+                    </div>
+                </div>
+                <div class="perfil-faq">
+                    ${PREGUNTAS.map(([p, r]) => `<details><summary>${p}</summary><p>${r}</p></details>`).join('')}
+                </div>
+            </section>`;
     }
 
     async function subirFoto(ev) {

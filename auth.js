@@ -20,7 +20,9 @@ const Auth = (() => {
                 // otras apps, y sin esta marca cualquier registro ajeno
                 // también creaba acá un perfil (rol 'dueno') para gente que
                 // nunca abrió ARM Mascotas.
-                data: { producto: 'mascotas', nombre: datosPerfil.nombre || '' },
+                // acepta_terminos: versión y fecha de los términos y la política
+                // de privacidad aceptados al registrarse (respaldo del consentimiento).
+                data: { producto: 'mascotas', nombre: datosPerfil.nombre || '', acepta_terminos: { version: '1.0', fecha: new Date().toISOString() } },
                 // Fijo, sin depender del Site URL del proyecto (ese queda
                 // apuntando a actualizar-password.html como respaldo del
                 // flujo de recuperación, no del de confirmación de cuenta).

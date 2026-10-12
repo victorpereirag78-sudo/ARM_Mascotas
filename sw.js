@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v12';
+const CACHE_NAME = 'arm-mascotas-v13';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -64,6 +64,11 @@ const ARCHIVOS_SHELL = [
     '/modulo-pasaporte.js',
     '/modulo-veterinaria.js',
     '/modulo-reservas.js',
+    '/modulo-tutorial.js',
+    '/modulo-tutorial.css',
+    '/privacidad.html',
+    '/terminos.html',
+    '/legal.css',
     '/vincular.html',
     '/instalar.html',
     '/instalar.css',

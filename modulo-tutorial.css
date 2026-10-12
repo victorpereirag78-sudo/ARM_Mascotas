@@ -1,0 +1,64 @@
+/* ================================================================
+   MODULO-TUTORIAL.CSS — Recorrido de bienvenida
+   ================================================================ */
+
+.tuto { position: fixed; inset: 0; z-index: 60; }
+.tuto-bloqueo { position: absolute; inset: 0; }
+.tuto-centrado .tuto-bloqueo { background: rgba(8, 20, 24, 0.62); }
+
+/* El foco "recorta" la pantalla oscura alrededor del elemento resaltado. */
+.tuto-foco {
+    position: fixed;
+    border-radius: 16px;
+    box-shadow: 0 0 0 9999px rgba(8, 20, 24, 0.62), 0 0 0 3px var(--color-primario);
+    transition: left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease;
+    pointer-events: none;
+}
+
+.tuto-card {
+    position: fixed;
+    width: min(360px, calc(100vw - 24px));
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    border: 1px solid var(--color-borde);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.55);
+    padding: 22px 22px 14px;
+    transition: left 0.25s ease, top 0.25s ease;
+}
+.tuto-centrado .tuto-card { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
+.tuto-card h3 { margin: 0 28px 8px 0; font-size: 18px; }
+.tuto-texto { margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: var(--color-texto-suave); }
+.tuto-cerrar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-fondo);
+    color: var(--color-texto-suave);
+    cursor: pointer;
+}
+.tuto-puntos { display: flex; gap: 5px; margin-bottom: 14px; }
+.tuto-puntos span { width: 7px; height: 7px; border-radius: 999px; background: var(--color-borde); transition: width 0.2s ease, background 0.2s ease; }
+.tuto-puntos span.activo { width: 20px; background: var(--color-primario); }
+.tuto-acciones { display: flex; align-items: center; gap: 8px; }
+.tuto-contador { margin-right: auto; font-size: 12px; font-weight: 600; color: var(--color-texto-suave); }
+.tuto-acciones .btn-primario { width: auto; }
+.tuto-saltar {
+    display: block;
+    margin: 10px auto 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 12px;
+    color: var(--color-texto-suave);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tuto-foco, .tuto-card { transition: none; }
+}
