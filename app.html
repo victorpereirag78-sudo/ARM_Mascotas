@@ -13,6 +13,10 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0d9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ARM Mascotas">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>ARM Mascotas</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/icons/logo.svg" type="image/svg+xml">
@@ -76,6 +80,7 @@
             </nav>
 
             <div class="sidebar-footer">
+                <button id="btnInstalarApp" class="btn-tema-inline btn-instalar" type="button" data-pwa-instalar hidden>📲 Instalar app</button>
                 <button id="btnTema" class="btn-tema-inline" type="button" title="Cambiar tema">🌙 Tema</button>
                 <button id="btnLogout" class="btn-logout" type="button">↩ Salir</button>
             </div>
@@ -139,6 +144,7 @@
     <script src="/modulo-emergencia.js"></script>
     <script src="/modulo-veterinaria.js"></script>
     <script src="/modulo-reservas.js"></script>
+    <script src="/pwa-instalar.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>

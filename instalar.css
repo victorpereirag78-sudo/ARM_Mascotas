@@ -1,0 +1,140 @@
+/* ================================================================
+   INSTALAR.CSS — Página /instalar (instalación de la PWA por link)
+   Reutiliza las variables de :root definidas en login.css.
+   ================================================================ */
+
+body { background: var(--color-fondo); }
+
+.inst-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px calc(32px + env(safe-area-inset-bottom));
+}
+
+.inst-hero {
+    width: calc(100% + 32px);
+    margin: 0 -16px;
+    text-align: center;
+    color: #fff;
+    padding: calc(52px + env(safe-area-inset-top)) 24px 96px;
+    background:
+        radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 100%, rgba(242, 115, 79, 0.3), transparent 48%),
+        var(--degradado);
+}
+.inst-hero img {
+    width: 84px;
+    height: 84px;
+    border-radius: 24px;
+    box-shadow: 0 16px 34px -12px rgba(0, 0, 0, 0.4);
+}
+.inst-hero h1 { margin: 20px 0 8px; font-size: 30px; font-weight: 700; line-height: 1.1; }
+.inst-hero h1 strong { display: block; font-weight: 800; }
+.inst-hero p { margin: 0 auto; max-width: 360px; font-size: 15px; line-height: 1.5; opacity: 0.92; }
+
+.inst-card {
+    width: 100%;
+    max-width: 460px;
+    margin-top: -60px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 22px;
+    box-shadow: var(--sombra-card);
+    padding: 28px 24px;
+    position: relative;
+}
+.inst-card h2 { margin: 0 0 10px; font-size: 21px; font-weight: 700; }
+.inst-texto { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: var(--color-texto-suave); }
+.inst-nota { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--color-texto-suave); }
+.inst-boton { display: block; text-align: center; text-decoration: none; }
+
+.inst-estado {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-radius: var(--radio-sm);
+    background: color-mix(in srgb, var(--color-exito) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-exito) 30%, transparent);
+}
+.inst-estado > span { font-size: 28px; }
+.inst-estado h2 { margin: 0; font-size: 17px; }
+.inst-estado p { margin: 2px 0 0; font-size: 13px; color: var(--color-texto-suave); }
+
+.inst-pasos { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.inst-pasos li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    padding: 12px 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-sm);
+    background: var(--color-fondo);
+}
+.inst-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--degradado);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.inst-ico {
+    width: 18px;
+    height: 18px;
+    vertical-align: -3px;
+    stroke: var(--color-primario-oscuro);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.inst-ico .relleno { fill: var(--color-primario-oscuro); stroke: none; }
+
+.inst-qr { text-align: center; }
+.inst-qr img { width: 180px; height: 180px; border-radius: var(--radio-sm); background: #fff; border: 1px solid var(--color-borde); }
+.inst-qr p { margin: 8px 0 0; font-size: 12px; color: var(--color-texto-suave); }
+
+.inst-beneficios {
+    list-style: none;
+    margin: 26px 0 0;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--color-borde);
+    display: grid;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--color-texto-suave);
+}
+.inst-beneficios li { display: flex; gap: 10px; align-items: center; }
+.inst-beneficios li span { font-size: 18px; }
+
+.inst-compartir { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.inst-compartir .btn-secundario { flex: 1; min-width: 150px; }
+#instMensaje { margin: 12px 0 0; min-height: 18px; }
+
+.inst-pie { margin: 22px 0 0; font-size: 12px; color: var(--color-texto-suave); text-align: center; }
+.inst-pie a { color: var(--color-primario-oscuro); font-weight: 600; text-decoration: none; }
+
+/* login.css define .btn-secundario solo en app.css: se repite aquí lo
+   mínimo porque esta página no carga el shell. */
+.btn-secundario {
+    padding: 11px 16px;
+    border-radius: var(--radio-sm);
+    border: 1px solid var(--color-borde);
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-secundario:hover { background: var(--color-fondo); }

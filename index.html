@@ -13,6 +13,10 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0d9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ARM Mascotas">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>ARM Mascotas — Acceso</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/icons/logo.svg" type="image/svg+xml">
@@ -87,6 +91,10 @@
                         ¿No tienes cuenta? <a href="/registro.html">Regístrate como dueño</a>
                     </p>
 
+                    <p class="form-footer-link" data-pwa-instalar hidden>
+                        <a href="/instalar.html">📲 Instalar la app en tu teléfono</a>
+                    </p>
+
                 </form>
 
                 <a href="https://armsistemas.cl" target="_blank" rel="noopener" style="display:block;margin-top:20px;text-align:center;font-size:12px;color:inherit;opacity:.65;text-decoration:none">Una app de ARM Sistemas</a>
@@ -103,5 +111,6 @@
     <script src="/utils.js"></script>
     <script src="/auth.js"></script>
     <script src="/login.js"></script>
+    <script src="/pwa-instalar.js"></script>
 </body>
 </html>

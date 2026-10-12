@@ -327,3 +327,7 @@ body { background: var(--color-fondo); }
 
     .bottom-nav { display: flex; justify-content: space-around; }
 }
+
+/* Botón "Instalar app": solo visible si la app no está instalada */
+.btn-instalar { background: color-mix(in srgb, var(--color-primario) 10%, transparent); border-color: color-mix(in srgb, var(--color-primario) 35%, var(--color-borde)); color: var(--color-primario-oscuro); }
+.btn-instalar:hover { background: color-mix(in srgb, var(--color-primario) 16%, transparent); }

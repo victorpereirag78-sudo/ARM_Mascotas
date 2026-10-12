@@ -76,6 +76,13 @@ const MENSAJES_CUENTA_BLOQUEADA = {
         window.location.href = '/index.html';
     });
 
+    // Instalar la app: con el aviso nativo del navegador si existe (Chrome,
+    // Edge, Android); si no (iPhone, otros), la guía paso a paso.
+    document.getElementById('btnInstalarApp').addEventListener('click', async () => {
+        if (window.PWAInstalar && PWAInstalar.puedeInstalarAhora()) await PWAInstalar.instalar();
+        else window.location.href = '/instalar.html';
+    });
+
     const destinoVet = parametros.get('vet');
     if (['presupuestos', 'reservar', 'encuestas', 'consentimientos', 'citas', 'privacidad'].includes(destinoVet)) sessionStorage.setItem('arm_vet_seccion', destinoVet);
     if (parametros.get('mascota')) sessionStorage.setItem('arm_abrir_mascota', parametros.get('mascota'));

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0d9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ARM Mascotas">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="description" content="Instala ARM Mascotas en tu teléfono: la historia de vida de tu mascota, siempre contigo.">
+    <title>Instalar ARM Mascotas</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/logo.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/login.css">
+    <link rel="stylesheet" href="/instalar.css">
+</head>
+<body>
+
+    <button id="btnTema" class="btn-tema" type="button" aria-label="Cambiar tema" title="Cambiar tema">🌙</button>
+
+    <main class="inst-wrap">
+        <header class="inst-hero">
+            <img src="/icons/logo.svg" alt="" width="84" height="84">
+            <h1>Instala <strong>ARM Mascotas</strong></h1>
+            <p>La historia de vida de tu mascota, siempre contigo. Sin pasar por una tienda de apps.</p>
+        </header>
+
+        <section class="inst-card" aria-live="polite">
+            <div id="instContenido"></div>
+
+            <ul class="inst-beneficios">
+                <li><span aria-hidden="true">⚡</span> Se abre con un toque desde tu pantalla de inicio</li>
+                <li><span aria-hidden="true">🔔</span> Avisos de vacunas, citas y recetas de tu veterinaria</li>
+                <li><span aria-hidden="true">📴</span> Pantalla completa, como una app de verdad</li>
+            </ul>
+
+            <div class="inst-compartir">
+                <button class="btn-secundario" id="btnCompartir" type="button">📤 Compartir este enlace</button>
+                <button class="btn-secundario" id="btnCopiar" type="button">🔗 Copiar enlace</button>
+            </div>
+            <p class="field-msg" id="instMensaje" role="status"></p>
+        </section>
+
+        <p class="inst-pie">Una app de <a href="https://armsistemas.cl" rel="noopener">ARM Sistemas</a> · <a href="/index.html">Ir al ingreso</a></p>
+    </main>
+
+    <script src="/utils.js"></script>
+    <script src="/pwa-instalar.js"></script>
+    <script src="/instalar.js"></script>
+</body>
+</html>
