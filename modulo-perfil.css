@@ -29,3 +29,40 @@
 .btn-subir-foto { cursor: pointer; }
 
 .btn-ancho-auto { width: auto; padding-left: 24px; padding-right: 24px; }
+
+/* ── Distribución: tarjeta de la persona + formulario en secciones ── */
+.perfil-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+.perfil-tarjeta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 28px 22px;
+    position: sticky;
+    top: 84px;
+}
+.perfil-tarjeta .perfil-avatar { width: 120px; height: 120px; font-size: 44px; margin-bottom: 6px; }
+.perfil-nombre { margin: 0; font-size: 21px; }
+.perfil-correo { margin: 0 0 6px; font-size: 13px; color: var(--color-texto-suave); word-break: break-all; }
+.perfil-ayuda { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: var(--color-texto-suave); }
+.perfil-form { padding: 26px; }
+.perfil-secciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    gap: 8px 36px;
+}
+.perfil-bloque .seccion-titulo { margin-top: 0; }
+.perfil-bloque { margin-bottom: 14px; }
+
+@media (max-width: 900px) {
+    .perfil-layout { grid-template-columns: 1fr; }
+    .perfil-tarjeta { position: static; padding: 22px 18px; }
+    .perfil-tarjeta .perfil-avatar { width: 96px; height: 96px; font-size: 36px; }
+    .perfil-form { padding: 18px; }
+}

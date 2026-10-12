@@ -15,6 +15,7 @@ const Dashboard = (() => {
         pendientesPorMascota = await cargarPendientes(mascotas.map((m) => m.id));
         el.innerHTML = plantilla(mascotas);
         wireEventos(el);
+        cargarProximos(el, mascotas);
         if (window.VetApp) VetApp.decorarDashboard(el);
     }
 
@@ -49,10 +50,12 @@ const Dashboard = (() => {
         const nombre = window.appData.perfil?.nombre || '';
         const saludo = `
             <div class="dashboard-cabecera">
-                <h2 class="dashboard-saludo">Hola${nombre ? ', ' + esc(nombre) : ''} 👋</h2>
+                <div>
+                    <h2 class="dashboard-saludo">Hola${nombre ? ', ' + esc(nombre) : ''} 👋</h2>
+                    <p class="dashboard-fecha">${capitalizar(new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }))}</p>
+                </div>
                 <div class="dashboard-cabecera-acciones">
                     <button class="btn-emergencia-dashboard" id="btnEmergencia">🚨 Emergencia Veterinaria</button>
-                    <button class="btn-secundario" id="btnIrAgenda">🗓️ Ver agenda completa</button>
                 </div>
             </div>
         `;
@@ -68,8 +71,31 @@ const Dashboard = (() => {
             `;
         }
 
-        const tarjetas = mascotas.map(tarjetaResumen).join('');
-        return `${saludo}<div class="dashboard-grid">${tarjetas}</div>`;
+        const puedeVet = Auth.puedeAcceder('panel-veterinaria');
+        return `
+            ${saludo}
+            <div class="layout-lateral dashboard-layout">
+                <div class="dashboard-principal">
+                    <h3 class="titulo-bloque">${mascotas.length === 1 ? 'Mi mascota' : `Mis mascotas <small>${mascotas.length}</small>`}
+                        <button class="enlace-accion" id="btnIrAMascotas">+ Agregar mascota</button></h3>
+                    <div class="dashboard-grid">${mascotas.map(tarjetaResumen).join('')}</div>
+                </div>
+                <aside class="dashboard-lateral">
+                    <section class="card dashboard-proximos">
+                        <h3 class="titulo-bloque">🗓️ Próximos <button class="enlace-accion" id="btnIrAgenda">Ver agenda</button></h3>
+                        <div id="dashProximos"><p class="dashboard-nota">Cargando...</p></div>
+                    </section>
+                    <section class="card dashboard-accesos">
+                        <h3 class="titulo-bloque">Accesos rápidos</h3>
+                        <div class="dashboard-accesos-grid">
+                            ${puedeVet ? '<button class="acceso-rapido" data-ir="reservar"><span>📅</span>Reservar hora</button>' : ''}
+                            <button class="acceso-rapido" data-ir="agenda"><span>⏰</span>Nuevo recordatorio</button>
+                            ${puedeVet ? '<button class="acceso-rapido" data-ir="veterinaria"><span>🏥</span>Mi veterinaria</button>' : ''}
+                            <button class="acceso-rapido" data-ir="compartir"><span>👪</span>Compartir con mi familia</button>
+                        </div>
+                    </section>
+                </aside>
+            </div>`;
     }
 
     function tarjetaResumen(m) {
@@ -77,54 +103,66 @@ const Dashboard = (() => {
         const dias = Utils.diasParaCumpleanos(m.fecha_nacimiento);
         const emojiEspecie = m.especie === 'perro' ? '🐶' : m.especie === 'gato' ? '🐱' : '🐾';
         const pendientes = pendientesPorMascota[m.id] || { proximaVacuna: null, proximaDesparasitacion: null, gastoAnio: 0 };
+        const sub = [esc(m.raza) || capitalizar(m.especie), m.sexo ? capitalizar(m.sexo) : ''].filter(Boolean).join(' · ');
 
         return `
-            <div class="card dashboard-card" data-id="${m.id}">
-                <div class="dashboard-card-cabecera">
-                    <div class="dashboard-card-foto">
+            <article class="card dashboard-card" data-id="${m.id}">
+                <div class="dc">
+                    <div class="dashboard-card-foto dc-foto" ${m.foto_url ? `style="--foto:url('${m.foto_url}')"` : ''}>
                         ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${emojiEspecie}</span>`}
                     </div>
-                    <div>
+                    <div class="dc-info">
                         <h3>${esc(m.nombre)}</h3>
-                        <p class="dashboard-card-sub">${esc(m.raza) || capitalizar(m.especie)}</p>
-                    </div>
-                </div>
-
-                <div class="dashboard-card-datos">
-                    <div class="dato">
-                        <span class="dato-etiqueta">Edad</span>
-                        <span class="dato-valor">${Utils.textoEdad(edad)}</span>
-                    </div>
-                    ${edad.edadHumanaEquivalente !== null ? `
-                        <div class="dato">
-                            <span class="dato-etiqueta">Edad humana</span>
-                            <span class="dato-valor">${edad.edadHumanaEquivalente} años</span>
+                        <p class="dashboard-card-sub">${sub}</p>
+                        <div class="dashboard-card-datos">
+                            <div class="dato">
+                                <span class="dato-etiqueta">Edad</span>
+                                <span class="dato-valor">${Utils.textoEdad(edad)}</span>
+                            </div>
+                            ${edad.edadHumanaEquivalente !== null ? `
+                                <div class="dato">
+                                    <span class="dato-etiqueta">Edad humana</span>
+                                    <span class="dato-valor">${edad.edadHumanaEquivalente} años</span>
+                                </div>
+                            ` : ''}
+                            <div class="dato">
+                                <span class="dato-etiqueta">Peso</span>
+                                <span class="dato-valor">${m.peso_actual ? m.peso_actual + ' kg' : '—'}</span>
+                            </div>
+                            <div class="dato">
+                                <span class="dato-etiqueta">Cumpleaños</span>
+                                <span class="dato-valor">${dias === null ? '—' : dias === 0 ? '¡Hoy! 🎉' : `en ${dias} días`}</span>
+                            </div>
                         </div>
-                    ` : ''}
-                    <div class="dato">
-                        <span class="dato-etiqueta">Peso</span>
-                        <span class="dato-valor">${m.peso_actual ? m.peso_actual + ' kg' : '—'}</span>
                     </div>
-                    <div class="dato">
-                        <span class="dato-etiqueta">Cumpleaños</span>
-                        <span class="dato-valor">${dias === null ? '—' : dias === 0 ? '¡Hoy! 🎉' : `en ${dias} días`}</span>
+                    <div class="dc-lado">
+                        <div class="dashboard-card-pendientes">
+                            <span class="pendiente-item">💉 Próxima vacuna: <b>${textoPendiente(pendientes.proximaVacuna)}</b></span>
+                            <span class="pendiente-item">🐛 Próxima desparasitación: <b>${textoPendiente(pendientes.proximaDesparasitacion)}</b></span>
+                            <span class="pendiente-item">💰 Gastos ${new Date().getFullYear()}: <b>$${pendientes.gastoAnio.toLocaleString('es-CL')}</b></span>
+                        </div>
+                        <button class="btn-secundario btn-ver-ficha" data-id="${m.id}">Ver ficha completa →</button>
                     </div>
                 </div>
-
-                <div class="dashboard-card-pendientes">
-                    <span class="pendiente-item">💉 Próxima vacuna: ${textoPendiente(pendientes.proximaVacuna)}</span>
-                    <span class="pendiente-item">🐛 Próxima desparasitación: ${textoPendiente(pendientes.proximaDesparasitacion)}</span>
-                    <span class="pendiente-item">💰 Gastos ${new Date().getFullYear()}: $${pendientes.gastoAnio.toLocaleString('es-CL')}</span>
-                </div>
-
-                <button class="btn-secundario btn-ver-ficha" data-id="${m.id}">Ver ficha completa</button>
-            </div>
+            </article>
         `;
     }
 
+    async function cargarProximos(el, mascotas) {
+        const caja = el.querySelector('#dashProximos');
+        if (!caja || !window.Agenda) return;
+        let lista = [];
+        try { lista = await Agenda.proximos(mascotas, 6); } catch (_e) { lista = []; }
+        caja.innerHTML = lista.length
+            ? `<div class="dashboard-proximos-lista">${lista.map((it) => Agenda.filaHtml(it, true)).join('')}</div>`
+            : '<p class="dashboard-nota">No hay fechas pendientes. Agrega recordatorios desde la agenda.</p>';
+    }
+
     function wireEventos(el) {
-        const btnIr = el.querySelector('#btnIrAMascotas');
-        if (btnIr) btnIr.addEventListener('click', () => irAPanel('panel-mascotas'));
+        el.querySelectorAll('#btnIrAMascotas').forEach((btn) => btn.addEventListener('click', () => {
+            sessionStorage.setItem('arm_nueva_mascota', '1');
+            irAPanel('panel-mascotas');
+        }));
 
         const btnAgenda = el.querySelector('#btnIrAgenda');
         if (btnAgenda) btnAgenda.addEventListener('click', () => irAPanel('panel-agenda'));
@@ -132,9 +170,21 @@ const Dashboard = (() => {
         const btnEmergencia = el.querySelector('#btnEmergencia');
         if (btnEmergencia) btnEmergencia.addEventListener('click', () => Emergencia.abrir());
 
+        // "Ver ficha" abre la ficha de ESA mascota, no el listado.
         el.querySelectorAll('.btn-ver-ficha').forEach((btn) => {
-            btn.addEventListener('click', () => irAPanel('panel-mascotas'));
+            btn.addEventListener('click', () => {
+                sessionStorage.setItem('arm_abrir_mascota', btn.dataset.id);
+                irAPanel('panel-mascotas');
+            });
         });
+
+        el.querySelectorAll('.acceso-rapido').forEach((btn) => btn.addEventListener('click', () => {
+            const ir = btn.dataset.ir;
+            if (ir === 'reservar') { sessionStorage.setItem('arm_vet_seccion', 'reservar'); irAPanel('panel-veterinaria'); }
+            else if (ir === 'veterinaria') irAPanel('panel-veterinaria');
+            else if (ir === 'agenda') irAPanel('panel-agenda');
+            else if (ir === 'compartir') irAPanel('panel-compartir');
+        }));
     }
 
     function textoPendiente(fechaISO) {

@@ -17,7 +17,7 @@ const ICONOS_NAV = {
 };
 
 const PANELES = [
-    { id: 'panel-dashboard', icono: ICONOS_NAV.home, etiqueta: 'Dashboard', corta: 'Inicio', modulo: () => window.Dashboard },
+    { id: 'panel-dashboard', icono: ICONOS_NAV.home, etiqueta: 'Inicio', modulo: () => window.Dashboard },
     { id: 'panel-mascotas', icono: ICONOS_NAV.paw, etiqueta: 'Mis mascotas', corta: 'Mascotas', modulo: () => window.Mascota },
     { id: 'panel-veterinaria', icono: ICONOS_NAV.clinica, etiqueta: 'Mi veterinaria', corta: 'Veterinaria', modulo: () => window.VetApp },
     { id: 'panel-agenda', icono: ICONOS_NAV.agenda, etiqueta: 'Agenda', modulo: () => window.Agenda },
@@ -85,7 +85,10 @@ const MENSAJES_CUENTA_BLOQUEADA = {
 
     const destinoVet = parametros.get('vet');
     if (['presupuestos', 'reservar', 'encuestas', 'consentimientos', 'citas', 'privacidad'].includes(destinoVet)) sessionStorage.setItem('arm_vet_seccion', destinoVet);
-    if (parametros.get('mascota')) sessionStorage.setItem('arm_abrir_mascota', parametros.get('mascota'));
+    if (parametros.get('mascota')) {
+        sessionStorage.setItem('arm_abrir_mascota', parametros.get('mascota'));
+        sessionStorage.setItem('arm_abrir_mascota_vet', '1');
+    }
     if (parametros.toString()) history.replaceState(null, '', '/app.html');
     const quiereVet = (destinoVet && destinoVet !== 'inicio') || VetApp.leerCodigo();
     const panelInicial = (quiereVet && Auth.puedeAcceder('panel-veterinaria'))

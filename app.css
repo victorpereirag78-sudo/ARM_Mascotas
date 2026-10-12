@@ -331,3 +331,94 @@ body { background: var(--color-fondo); }
 /* Botón "Instalar app": solo visible si la app no está instalada */
 .btn-instalar { background: color-mix(in srgb, var(--color-primario) 10%, transparent); border-color: color-mix(in srgb, var(--color-primario) 35%, var(--color-borde)); color: var(--color-primario-oscuro); }
 .btn-instalar:hover { background: color-mix(in srgb, var(--color-primario) 16%, transparent); }
+
+/* ── Distribución: aprovechar todo el ancho de la pantalla ─────────
+   Cada panel ocupa el ancho disponible (con un tope para monitores
+   muy anchos) y reparte su contenido en columnas: formulario a la
+   izquierda y listado a la derecha, o principal + lateral. Bajo
+   1100 px todo vuelve a una columna. ─────────────────────────── */
+.app-contenido > .panel { max-width: 1680px; margin-inline: auto; }
+.form-panel-embed { max-width: none; }
+
+.titulo-bloque {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-size: 17px;
+    font-weight: 700;
+}
+.enlace-accion {
+    border: none;
+    background: none;
+    padding: 4px 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-primario-oscuro);
+    cursor: pointer;
+    white-space: nowrap;
+}
+.enlace-accion:hover { text-decoration: underline; }
+:root[data-theme="dark"] .enlace-accion { color: var(--color-primario); }
+
+/* Principal + columna lateral (inicio) */
+.layout-lateral {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    gap: 24px;
+    align-items: start;
+}
+.layout-lateral > * { min-width: 0; }
+.layout-lateral > aside { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; position: sticky; top: 84px; }
+
+/* Formulario fijo a la izquierda y listado a la derecha. Se activa
+   solo si el contenedor trae la tarjeta de formulario (agenda,
+   historia de vida, veterinarios autorizados, compartir). */
+.form-lateral:has(> .historial-form-card) {
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    column-gap: 28px;
+    row-gap: 0;
+    align-items: start;
+}
+.form-lateral:has(> .historial-form-card) > .historial-form-card {
+    grid-column: 1;
+    grid-row: 1 / span 8;
+    position: sticky;
+    top: 84px;
+    margin-bottom: 0;
+}
+.form-lateral:has(> .historial-form-card) > :not(.historial-form-card) { grid-column: 2; min-width: 0; }
+.form-lateral:has(> .historial-form-card) .grid-2 { grid-template-columns: 1fr 1fr; }
+
+/* Listados con aspecto de tarjeta */
+.form-lateral > .historial-lista,
+.form-lateral > .agenda-lista,
+.lista-tarjeta {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-sm);
+    padding: 4px 20px;
+}
+
+/* Tarjetas que se reparten solas en 1, 2 o 3 columnas */
+.grid-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .layout-lateral { grid-template-columns: minmax(0, 1fr); }
+    .layout-lateral > aside { position: static; }
+    .form-lateral:has(> .historial-form-card) { display: block; }
+    .form-lateral:has(> .historial-form-card) > .historial-form-card { position: static; margin-bottom: 20px; }
+}
+@media (max-width: 560px) {
+    .form-lateral:has(> .historial-form-card) .grid-2 { grid-template-columns: 1fr; }
+    .form-lateral > .historial-lista, .form-lateral > .agenda-lista, .lista-tarjeta { padding: 2px 14px; }
+}

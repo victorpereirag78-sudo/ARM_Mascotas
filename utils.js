@@ -167,7 +167,10 @@ const Utils = (() => {
     }
 
     function actualizarIconoTema(btnTema) {
-        btnTema.textContent = temaActual() === 'dark' ? '☀️' : '🌙';
+        const oscuro = temaActual() === 'dark';
+        // En el menú lateral (data-etiqueta) el botón dice qué hace; en el
+        // login es solo el ícono redondo.
+        btnTema.textContent = (oscuro ? '☀️' : '🌙') + (btnTema.hasAttribute('data-etiqueta') ? (oscuro ? ' Tema claro' : ' Tema oscuro') : '');
     }
 
     return {

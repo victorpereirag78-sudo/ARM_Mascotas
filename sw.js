@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v11';
+const CACHE_NAME = 'arm-mascotas-v12';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -90,7 +90,10 @@ self.addEventListener('install', (evento) => {
             .then((cache) => Promise.all(
                 // cache.add() individual por archivo: si uno falla no aborta
                 // la instalación completa (a diferencia de cache.addAll).
-                ARCHIVOS_SHELL.map((ruta) => cache.add(ruta).catch(() => {}))
+                // cache: 'reload' pide cada archivo al servidor y no a la caché
+                // HTTP del navegador: Cloudflare manda los .js/.css con max-age
+                // de 4 h, y sin esto la versión nueva se instalaba con archivos viejos.
+                ARCHIVOS_SHELL.map((ruta) => cache.add(new Request(ruta, { cache: 'reload' })).catch(() => {}))
             ))
             .then(() => self.skipWaiting())
     );
@@ -133,7 +136,7 @@ self.addEventListener('fetch', (evento) => {
     evento.respondWith(
         caches.match(evento.request).then((cacheada) => {
             if (cacheada) {
-                fetch(evento.request)
+                fetch(evento.request, { cache: 'no-cache' })
                     .then((respuesta) => {
                         if (respuesta && respuesta.ok) {
                             caches.open(CACHE_NAME).then((cache) => cache.put(evento.request, respuesta)).catch(() => {});

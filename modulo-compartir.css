@@ -2,7 +2,7 @@
    MODULO-COMPARTIR.CSS
    ================================================================ */
 
-.compartir-seccion { margin-bottom: 20px; max-width: 640px; }
+.compartir-seccion { margin-bottom: 20px; }
 
 .invitacion-item {
     display: flex;
@@ -40,3 +40,6 @@
 .badge-pendiente { background: rgba(255, 170, 0, 0.15); color: #b06a00; }
 .badge-aceptada { background: rgba(47, 158, 88, 0.15); color: var(--color-exito); }
 .badge-rechazada { background: rgba(214, 69, 69, 0.15); color: var(--color-error); }
+
+.grid-tarjetas > .compartir-seccion { margin-bottom: 0; padding: 24px; }
+.compartir-vacio { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: var(--color-texto-suave); }

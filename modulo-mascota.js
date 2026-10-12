@@ -1,8 +1,12 @@
 // ================================================================
-// MODULO-MASCOTA.JS — CRUD de mascotas (panel-mascotas)
+// MODULO-MASCOTA.JS — Mis mascotas y ficha de cada mascota (panel-mascotas)
 // Depende de: config.js, utils.js, auth.js
 // Expone window.Mascota (incluye cargarMascotas(), reutilizado por
 // modulo-dashboard.js y modulo-compartir.js para no repetir la query)
+//
+// Ficha: cabecera con la foto y los datos clave + pestañas. Cada
+// pestaña monta su módulo recién al abrirla (Historial, CarpetaVet,
+// QR + Perdida, Pasaporte, AutorizacionVet) y "Datos" es el formulario.
 // ================================================================
 
 const Mascota = (() => {
@@ -10,18 +14,38 @@ const Mascota = (() => {
     let vista = 'lista';       // 'lista' | 'formulario'
     let editando = null;       // fila de mascota en edición, o null si es alta
     let contenedorActual = null;
+    let pestana = 'salud';
+    let montadas = new Set();
+
+    const PESTANAS = [
+        ['salud', '🩺 Salud'],
+        ['veterinaria', '🏥 Veterinaria'],
+        ['sos', '🆘 SOS y QR'],
+        ['pasaporte', '🛂 Pasaporte'],
+        ['compartir', '🩻 Veterinarios'],
+        ['datos', '✏️ Datos']
+    ];
 
     async function init(el) {
         contenedorActual = el;
         vista = 'lista';
         editando = null;
         await cargarMascotas();
-        // Llegó desde un aviso de la veterinaria: abrir directo esa mascota.
+        // Llegó desde el inicio o desde un aviso de la veterinaria: abrir
+        // directo esa mascota (el aviso abre la pestaña de la veterinaria).
         const abrir = sessionStorage.getItem('arm_abrir_mascota');
+        const desdeVet = sessionStorage.getItem('arm_abrir_mascota_vet');
+        sessionStorage.removeItem('arm_abrir_mascota');
+        sessionStorage.removeItem('arm_abrir_mascota_vet');
         if (abrir) {
-            sessionStorage.removeItem('arm_abrir_mascota');
             const m = (window.appData.mascotas || []).find((x) => x.id === abrir);
-            if (m) { editando = m; vista = 'formulario'; }
+            if (m) abrirFicha(m, desdeVet ? 'veterinaria' : 'salud');
+            else render();
+            return;
+        }
+        if (sessionStorage.getItem('arm_nueva_mascota')) {
+            sessionStorage.removeItem('arm_nueva_mascota');
+            vista = 'formulario';
         }
         render();
     }
@@ -42,21 +66,30 @@ const Mascota = (() => {
         return data;
     }
 
+    function abrirFicha(m, pestanaInicial) {
+        editando = m;
+        vista = 'formulario';
+        pestana = pestanaInicial || 'salud';
+        render();
+    }
+
     function render() {
         if (!contenedorActual) return;
-        contenedorActual.innerHTML = vista === 'lista' ? plantillaLista() : plantillaFormulario(editando);
+        montadas = new Set();
+        contenedorActual.innerHTML = vista === 'lista' ? plantillaLista() : editando ? plantillaFicha(editando) : plantillaAlta();
         wireEventos();
+        if (vista === 'formulario' && editando) mostrarPestana(pestana);
     }
 
     // ── Vista lista ──────────────────────────────────────────────
     function plantillaLista() {
         const mascotas = window.appData.mascotas || [];
-        const tarjetas = mascotas.map(tarjetaMascota).join('');
         return `
             <div class="mascota-toolbar">
+                <p class="mascota-toolbar-texto">${mascotas.length ? `${mascotas.length} ${mascotas.length === 1 ? 'mascota registrada' : 'mascotas registradas'}` : ''}</p>
                 <button class="btn-primario btn-ancho-auto" id="btnNuevaMascota">+ Agregar mascota</button>
             </div>
-            ${mascotas.length ? `<div class="mascota-grid">${tarjetas}</div>` : plantillaEstadoVacio()}
+            ${mascotas.length ? `<div class="mascota-grid">${mascotas.map(tarjetaMascota).join('')}</div>` : plantillaEstadoVacio()}
         `;
     }
 
@@ -72,44 +105,142 @@ const Mascota = (() => {
 
     function tarjetaMascota(m) {
         const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie);
-        const emojiEspecie = m.especie === 'perro' ? '🐶' : m.especie === 'gato' ? '🐱' : '🐾';
         return `
-            <div class="mascota-card" data-id="${m.id}">
-                <div class="mascota-card-foto">
-                    ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${emojiEspecie}</span>`}
+            <article class="mascota-card" data-id="${m.id}" tabindex="0" role="button" aria-label="Abrir la ficha de ${esc(m.nombre)}">
+                <div class="mascota-card-foto" ${m.foto_url ? `style="--foto:url('${m.foto_url}')"` : ''}>
+                    ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${emoji(m.especie)}</span>`}
                 </div>
                 <div class="mascota-card-info">
                     <h3>${esc(m.nombre)}</h3>
-                    <p>${esc(m.raza) || capitalizar(m.especie)} · ${Utils.textoEdad(edad)}</p>
-                    <button class="btn-secundario btn-editar-mascota" data-id="${m.id}">Ver ficha</button>
+                    <p>${esc(m.raza) || capitalizar(m.especie)}${m.sexo ? ' · ' + capitalizar(m.sexo) : ''}</p>
+                    <div class="mascota-card-chips">
+                        <span>🎂 ${Utils.textoEdad(edad)}</span>
+                        ${m.peso_actual ? `<span>⚖️ ${m.peso_actual} kg</span>` : ''}
+                    </div>
+                    <span class="mascota-card-ir">Ver ficha →</span>
+                </div>
+            </article>
+        `;
+    }
+
+    // ── Alta (mascota nueva) ─────────────────────────────────────
+    function plantillaAlta() {
+        return `
+            <div class="ficha">
+                <div class="ficha-barra">
+                    <button class="btn-secundario" id="btnVolverLista">← Mis mascotas</button>
+                </div>
+                <div class="card ficha-datos">
+                    <h2 class="ficha-alta-titulo">Nueva mascota</h2>
+                    <p class="nota-foto">📷 Podrás agregar la foto apenas crees la ficha.</p>
+                    ${plantillaFormulario({})}
                 </div>
             </div>
         `;
     }
 
-    // ── Vista formulario (alta / edición) ───────────────────────
-    function plantillaFormulario(m) {
-        const esEdicion = !!m;
-        m = m || {};
-        const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie || 'perro');
+    // ── Ficha (cabecera + pestañas) ──────────────────────────────
+    function plantillaFicha(m) {
+        const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie);
+        const dias = Utils.diasParaCumpleanos(m.fecha_nacimiento);
+        const sub = [esc(m.raza), capitalizar(m.especie), m.sexo ? capitalizar(m.sexo) : '', m.estado_reproductivo === 'esterilizado' ? 'Esterilizado' : '']
+            .filter(Boolean).join(' · ');
+        const chip = (etiqueta, valor) => (valor ? `<div class="ficha-chip"><small>${etiqueta}</small><b>${valor}</b></div>` : '');
 
         return `
-            <div class="form-panel-embed">
-                <button class="btn-secundario" id="btnVolverLista">← Volver a mis mascotas</button>
+            <div class="ficha">
+                <div class="ficha-barra">
+                    <button class="btn-secundario" id="btnVolverLista">← Mis mascotas</button>
+                </div>
 
-                ${esEdicion ? `
-                    <div class="perfil-avatar-fila mascota-avatar-fila">
-                        <div class="perfil-avatar" id="avatarMascotaPreview">
-                            ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : '🐾'}
-                        </div>
-                        <label class="btn-secundario btn-subir-foto">
-                            Cambiar foto
-                            <input type="file" id="inputFotoMascota" accept="image/*" hidden>
-                        </label>
+                <section class="card ficha-cabecera">
+                    <div class="ficha-foto" id="avatarMascotaPreview" ${m.foto_url ? `style="--foto:url('${m.foto_url}')"` : ''}>
+                        ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${emoji(m.especie)}</span>`}
                     </div>
-                ` : `<p class="nota-foto">📷 Podrás agregar la foto después de crear la ficha.</p>`}
+                    <div class="ficha-identidad">
+                        <h2>${esc(m.nombre)}</h2>
+                        <p class="ficha-sub">${sub}</p>
+                        <div class="ficha-chips">
+                            ${chip('Edad', Utils.textoEdad(edad))}
+                            ${chip('Edad humana', edad.edadHumanaEquivalente !== null ? `${edad.edadHumanaEquivalente} años` : '')}
+                            ${chip('Peso', m.peso_actual ? `${m.peso_actual} kg` : '')}
+                            ${chip('Cumpleaños', dias === null ? '' : dias === 0 ? '¡Hoy! 🎉' : `en ${dias} días`)}
+                            ${chip('Microchip', esc(m.microchip))}
+                        </div>
+                    </div>
+                    <label class="btn-secundario btn-subir-foto ficha-cambiar-foto">
+                        📷 Cambiar foto
+                        <input type="file" id="inputFotoMascota" accept="image/*" hidden>
+                    </label>
+                </section>
 
+                <nav class="ficha-tabs" role="tablist" aria-label="Secciones de la ficha">
+                    ${PESTANAS.map(([k, t]) => `<button type="button" role="tab" class="ficha-tab" data-pestana="${k}">${t}</button>`).join('')}
+                </nav>
+
+                <div class="ficha-panel" data-panel="salud" hidden>
+                    <p class="ficha-panel-ayuda">Lo que tú registras: vacunas, consultas, medicamentos, alimentación, gastos y su diario.</p>
+                    <div id="historialContenedor"></div>
+                </div>
+                <div class="ficha-panel" data-panel="veterinaria" hidden>
+                    <p class="ficha-panel-ayuda">Lo que registró su veterinaria en ARM Veterinaria (solo lectura).</p>
+                    <div id="carpetaVetContenedor" class="card"></div>
+                </div>
+                <div class="ficha-panel" data-panel="sos" hidden>
+                    <div id="qrContenedor" class="grid-tarjetas"></div>
+                    <h3 class="titulo-bloque ficha-subtitulo">🚨 Mascota perdida</h3>
+                    <div id="perdidaContenedor"></div>
+                </div>
+                <div class="ficha-panel" data-panel="pasaporte" hidden>
+                    <div id="pasaporteContenedor" class="grid-tarjetas"></div>
+                </div>
+                <div class="ficha-panel" data-panel="compartir" hidden>
+                    <p class="ficha-panel-ayuda">Veterinarios que pueden ver la historia de ${esc(m.nombre)} con su cuenta de ARM Mascotas.</p>
+                    <div id="autorizacionVetContenedor" class="form-lateral"></div>
+                </div>
+                <div class="ficha-panel" data-panel="datos" hidden>
+                    <div class="card ficha-datos">${plantillaFormulario(m)}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function mostrarPestana(clave) {
+        pestana = clave;
+        contenedorActual.querySelectorAll('.ficha-tab').forEach((b) => {
+            const activa = b.dataset.pestana === clave;
+            b.classList.toggle('activa', activa);
+            b.setAttribute('aria-selected', activa ? 'true' : 'false');
+        });
+        contenedorActual.querySelectorAll('.ficha-panel').forEach((p) => (p.hidden = p.dataset.panel !== clave));
+        montar(clave);
+    }
+
+    // Monta el módulo de la pestaña. Salud y Veterinaria se montan una vez;
+    // SOS y Pasaporte se recargan cada vez porque resumen datos de las otras.
+    function montar(clave) {
+        if (!editando) return;
+        const unaVez = ['salud', 'veterinaria', 'compartir', 'datos'].includes(clave);
+        if (unaVez && montadas.has(clave)) return;
+        montadas.add(clave);
+        const $ = (id) => document.getElementById(id);
+        if (clave === 'salud' && $('historialContenedor')) Historial.init($('historialContenedor'), editando.id);
+        if (clave === 'veterinaria' && $('carpetaVetContenedor') && window.CarpetaVet) CarpetaVet.init($('carpetaVetContenedor'), editando);
+        if (clave === 'sos') {
+            if ($('qrContenedor')) QR.init($('qrContenedor'), editando);
+            if ($('perdidaContenedor')) Perdida.init($('perdidaContenedor'), editando);
+        }
+        if (clave === 'pasaporte' && $('pasaporteContenedor')) Pasaporte.init($('pasaporteContenedor'), editando);
+        if (clave === 'compartir' && $('autorizacionVetContenedor')) AutorizacionVet.init($('autorizacionVetContenedor'), editando.id);
+    }
+
+    function plantillaFormulario(m) {
+        const esEdicion = !!m.id;
+        const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie || 'perro');
+        return `
                 <form id="formMascota" novalidate>
+                    <div class="ficha-form-secciones">
+                    <div>
                     <h3 class="seccion-titulo">Datos básicos</h3>
                     <div class="grid-2">
                         <div class="field-group">
@@ -149,7 +280,9 @@ const Mascota = (() => {
                             <div class="input-wrap"><span class="edad-en-vivo" id="edadEnVivo">${Utils.textoEdad(edad)}${edad.edadHumanaEquivalente !== null ? ` · ${edad.edadHumanaEquivalente} años humanos` : ''}</span></div>
                         </div>
                     </div>
+                    </div>
 
+                    <div>
                     <h3 class="seccion-titulo">Características</h3>
                     <div class="grid-2">
                         <div class="field-group">
@@ -183,6 +316,8 @@ const Mascota = (() => {
                             <div class="input-wrap"><input type="text" id="mObservaciones" value="${esc(m.observaciones)}"></div>
                         </div>
                     </div>
+                    </div>
+                    </div>
 
                     <div class="field-msg" id="mascotaMensaje"></div>
                     <div class="mascota-form-acciones">
@@ -190,34 +325,6 @@ const Mascota = (() => {
                         ${esEdicion ? `<button type="button" class="btn-peligro" id="btnEliminarMascota">Eliminar mascota</button>` : ''}
                     </div>
                 </form>
-
-                ${esEdicion ? `
-                    <div class="historial-wrap">
-                        <h3 class="seccion-titulo historial-wrap-titulo">🩺 Carpeta médica de la veterinaria</h3>
-                        <div id="carpetaVetContenedor"></div>
-                    </div>
-                    <div class="historial-wrap">
-                        <h3 class="seccion-titulo historial-wrap-titulo">SOS y código QR</h3>
-                        <div id="qrContenedor"></div>
-                    </div>
-                    <div class="historial-wrap">
-                        <h3 class="seccion-titulo historial-wrap-titulo">Mascota perdida</h3>
-                        <div id="perdidaContenedor"></div>
-                    </div>
-                    <div class="historial-wrap">
-                        <h3 class="seccion-titulo historial-wrap-titulo">🐾 Pasaporte Digital</h3>
-                        <div id="pasaporteContenedor"></div>
-                    </div>
-                    <div class="historial-wrap">
-                        <h3 class="seccion-titulo historial-wrap-titulo">Veterinarios autorizados</h3>
-                        <div id="autorizacionVetContenedor"></div>
-                    </div>
-                    <div class="historial-wrap">
-                        <h3 class="seccion-titulo historial-wrap-titulo">Historia de vida</h3>
-                        <div id="historialContenedor"></div>
-                    </div>
-                ` : ''}
-            </div>
         `;
     }
 
@@ -228,24 +335,25 @@ const Mascota = (() => {
                 vista = 'formulario';
                 render();
             });
-            document.querySelectorAll('.btn-editar-mascota').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    editando = (window.appData.mascotas || []).find((m) => m.id === btn.dataset.id);
-                    vista = 'formulario';
-                    render();
-                });
+            contenedorActual.querySelectorAll('.mascota-card').forEach((card) => {
+                const abrir = () => abrirFicha((window.appData.mascotas || []).find((m) => m.id === card.dataset.id), 'salud');
+                card.addEventListener('click', abrir);
+                card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); } });
             });
             return;
         }
 
         document.getElementById('btnVolverLista').addEventListener('click', () => {
             vista = 'lista';
+            editando = null;
             render();
+            window.scrollTo({ top: 0 });
         });
+
+        contenedorActual.querySelectorAll('.ficha-tab').forEach((b) => b.addEventListener('click', () => mostrarPestana(b.dataset.pestana)));
 
         document.getElementById('mFechaNacimiento').addEventListener('input', actualizarEdadEnVivo);
         document.getElementById('mEspecie').addEventListener('change', actualizarEdadEnVivo);
-
         document.getElementById('formMascota').addEventListener('submit', guardar);
 
         const inputFoto = document.getElementById('inputFotoMascota');
@@ -253,36 +361,6 @@ const Mascota = (() => {
 
         const btnEliminar = document.getElementById('btnEliminarMascota');
         if (btnEliminar) btnEliminar.addEventListener('click', eliminar);
-
-        const carpetaVetContenedor = document.getElementById('carpetaVetContenedor');
-        if (carpetaVetContenedor && editando && window.CarpetaVet) {
-            CarpetaVet.init(carpetaVetContenedor, editando);
-        }
-
-        const historialContenedor = document.getElementById('historialContenedor');
-        if (historialContenedor && editando) {
-            Historial.init(historialContenedor, editando.id);
-        }
-
-        const qrContenedor = document.getElementById('qrContenedor');
-        if (qrContenedor && editando) {
-            QR.init(qrContenedor, editando);
-        }
-
-        const perdidaContenedor = document.getElementById('perdidaContenedor');
-        if (perdidaContenedor && editando) {
-            Perdida.init(perdidaContenedor, editando);
-        }
-
-        const pasaporteContenedor = document.getElementById('pasaporteContenedor');
-        if (pasaporteContenedor && editando) {
-            Pasaporte.init(pasaporteContenedor, editando);
-        }
-
-        const autorizacionVetContenedor = document.getElementById('autorizacionVetContenedor');
-        if (autorizacionVetContenedor && editando) {
-            AutorizacionVet.init(autorizacionVetContenedor, editando.id);
-        }
     }
 
     function actualizarEdadEnVivo() {
@@ -327,10 +405,11 @@ const Mascota = (() => {
         Utils.setLoading(btn, true);
 
         let error;
+        let creada = null;
         if (editando) {
             ({ error } = await db.from('mascotas').update(datos).eq('id', editando.id));
         } else {
-            ({ error } = await db.from('mascotas').insert({ ...datos, dueno_id: window.appData.usuario.id }));
+            ({ data: creada, error } = await db.from('mascotas').insert({ ...datos, dueno_id: window.appData.usuario.id }).select('id').maybeSingle());
         }
 
         Utils.setLoading(btn, false);
@@ -341,11 +420,13 @@ const Mascota = (() => {
             return;
         }
 
-        Utils.toast(editando ? 'Mascota actualizada' : 'Mascota creada', 'exito');
+        Utils.toast(editando ? 'Mascota actualizada' : 'Ficha creada: ya puedes agregar su foto', 'exito');
+        const idFicha = editando ? editando.id : creada && creada.id;
         await cargarMascotas();
-        vista = 'lista';
-        editando = null;
-        render();
+        // Sigue en la ficha (con la cabecera ya actualizada) en vez de volver al listado.
+        const fila = idFicha && (window.appData.mascotas || []).find((x) => x.id === idFicha);
+        if (fila) abrirFicha(fila, editando ? 'datos' : 'salud');
+        else { vista = 'lista'; editando = null; render(); }
     }
 
     async function subirFoto(ev) {
@@ -365,7 +446,9 @@ const Mascota = (() => {
         }
 
         editando.foto_url = res.url;
-        document.getElementById('avatarMascotaPreview').innerHTML = `<img src="${res.url}" alt="${esc(editando.nombre)}">`;
+        const foto = document.getElementById('avatarMascotaPreview');
+        foto.style.setProperty('--foto', `url('${res.url}')`);
+        foto.innerHTML = `<img src="${res.url}" alt="${esc(editando.nombre)}">`;
         await cargarMascotas();
         Utils.toast('Foto actualizada', 'exito');
     }
@@ -399,6 +482,10 @@ const Mascota = (() => {
 
     function sel(actual, esperado) {
         return actual === esperado ? 'selected' : '';
+    }
+
+    function emoji(especie) {
+        return especie === 'perro' ? '🐶' : especie === 'gato' ? '🐱' : '🐾';
     }
 
     function capitalizar(s) {

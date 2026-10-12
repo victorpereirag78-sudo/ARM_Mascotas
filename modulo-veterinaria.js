@@ -351,9 +351,12 @@ const VetApp = (() => {
             if (cab) cab.after(aviso); else el.prepend(aviso);
         }
         if (window.VetExtra) {
-            const [enc, cons] = await Promise.all([rpc('vet_app_encuestas').catch(() => []), rpc('vet_app_consentimientos').catch(() => [])]);
+            const [enc, cons, citas] = await Promise.all([rpc('vet_app_encuestas').catch(() => []), rpc('vet_app_consentimientos').catch(() => []),
+                rpc('vet_app_mis_citas').catch(() => [])]);
             const porFirmar = (cons || []).filter((k) => k.estado === 'pendiente');
+            const porConfirmar = (citas || []).filter((c) => c.puede_confirmar);
             const banners = [
+                porConfirmar.length && [`📅 Tienes <b>${porConfirmar.length}</b> ${porConfirmar.length === 1 ? 'hora' : 'horas'} en tu veterinaria por confirmar <span>Confirmar →</span>`, 'citas'],
                 porFirmar.length && [`✍️ Tienes <b>${porFirmar.length}</b> ${porFirmar.length === 1 ? 'consentimiento' : 'consentimientos'} por firmar <span>Firmar →</span>`, 'consentimientos'],
                 (enc || []).length && [`⭐ Cuéntanos cómo te atendieron: <b>${enc.length}</b> ${enc.length === 1 ? 'encuesta' : 'encuestas'} de 10 segundos <span>Responder →</span>`, 'encuestas']
             ].filter(Boolean);
@@ -378,6 +381,7 @@ const VetApp = (() => {
 
     function abrirMascota(mascotaAppId) {
         sessionStorage.setItem('arm_abrir_mascota', mascotaAppId);
+        sessionStorage.setItem('arm_abrir_mascota_vet', '1');
         irAPanel('panel-mascotas');
     }
 

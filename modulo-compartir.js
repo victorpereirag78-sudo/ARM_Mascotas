@@ -46,8 +46,14 @@ const Compartir = (() => {
     function render() {
         contenedorActual.innerHTML = `
             ${invitacionesRecibidas.length ? plantillaInvitacionesRecibidas() : ''}
-            ${plantillaInvitarForm()}
-            ${plantillaComparticionesEnviadas()}
+            <div class="grid-tarjetas">
+                ${plantillaInvitarForm()}
+                ${plantillaComparticionesEnviadas() || `
+                    <div class="card compartir-seccion">
+                        <h3 class="seccion-titulo">Accesos compartidos</h3>
+                        <p class="compartir-vacio">Todavía no compartes ninguna mascota. Invita a tu pareja, a un familiar o a quien la cuida para que vea su ficha desde su propia cuenta.</p>
+                    </div>`}
+            </div>
         `;
         wireEventos();
     }
@@ -83,7 +89,7 @@ const Compartir = (() => {
 
         const opciones = misMascotas.map((m) => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('');
         return `
-            <div class="form-panel-embed compartir-seccion">
+            <div class="card compartir-seccion">
                 <h3 class="seccion-titulo">Invitar a un familiar</h3>
                 <form id="formInvitar" novalidate>
                     <div class="grid-2">

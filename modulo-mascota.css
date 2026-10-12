@@ -1,13 +1,15 @@
 /* ================================================================
-   MODULO-MASCOTA.CSS
+   MODULO-MASCOTA.CSS — Mis mascotas (lista) y ficha con pestañas
    ================================================================ */
 
-.mascota-toolbar { margin-bottom: 18px; }
+/* ── Lista ───────────────────────────────────────────────────── */
+.mascota-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.mascota-toolbar-texto { margin: 0; color: var(--color-texto-suave); font-size: 14px; }
 
 .mascota-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 20px;
 }
 
 .mascota-card {
@@ -17,41 +19,131 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
+    box-shadow: var(--sombra-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
+.mascota-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); border-color: color-mix(in srgb, var(--color-primario) 40%, var(--color-borde)); }
+.mascota-card:focus-visible { outline: none; box-shadow: var(--anillo-foco); }
 
-.mascota-card-foto {
-    height: 220px;
-    background: var(--color-fondo);
+.mascota-card-foto, .ficha-foto {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 44px;
-}
-.mascota-card-foto img { width: 100%; height: 100%; object-fit: contain; }
-
-.mascota-card-info { padding: 14px; }
-.mascota-card-info h3 { margin: 0 0 4px; font-size: 16px; }
-.mascota-card-info p { margin: 0 0 12px; font-size: 13px; color: var(--color-texto-suave); }
-
-.mascota-avatar-fila .perfil-avatar {
-    width: 140px;
-    height: 140px;
     font-size: 48px;
-    background: var(--color-secundario);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--color-primario) 10%, var(--color-fondo)), color-mix(in srgb, var(--color-secundario) 12%, var(--color-fondo)));
 }
+.mascota-card-foto { aspect-ratio: 4 / 3; }
+/* La foto se ve completa y el espacio sobrante se rellena con ella misma, difuminada. */
+.mascota-card-foto[style]::before, .ficha-foto[style]::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: var(--foto) center / cover;
+    filter: blur(18px) saturate(1.2);
+    opacity: 0.55;
+}
+.mascota-card-foto img, .ficha-foto img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+
+.mascota-card-info { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.mascota-card-info h3 { margin: 0; font-size: 19px; font-weight: 700; }
+.mascota-card-info p { margin: 0; font-size: 13px; color: var(--color-texto-suave); }
+.mascota-card-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.mascota-card-chips span { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--color-fondo); border: 1px solid var(--color-borde); }
+.mascota-card-ir { margin-top: auto; padding-top: 10px; font-size: 13px; font-weight: 700; color: var(--color-primario-oscuro); }
+:root[data-theme="dark"] .mascota-card-ir { color: var(--color-primario); }
+
+/* ── Ficha ───────────────────────────────────────────────────── */
+.ficha-barra { margin-bottom: 14px; }
+.ficha-alta-titulo { margin: 0 0 4px; font-size: 22px; }
+
+.ficha-cabecera {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: center;
+    padding: 24px;
+}
+.ficha-foto { width: 150px; height: 150px; border-radius: 28px; font-size: 60px; flex-shrink: 0; }
+.ficha-identidad h2 { margin: 0; font-size: 30px; line-height: 1.1; }
+.ficha-sub { margin: 4px 0 14px; color: var(--color-texto-suave); font-size: 14px; }
+.ficha-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.ficha-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 14px;
+    border-radius: 14px;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    min-width: 110px;
+}
+.ficha-chip small { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-texto-suave); }
+.ficha-chip b { font-size: 15px; }
+.ficha-cambiar-foto { align-self: start; white-space: nowrap; }
+
+.ficha-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 20px 0 18px;
+    padding: 6px;
+    border-radius: 16px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.ficha-tabs::-webkit-scrollbar { display: none; }
+.ficha-tab {
+    flex: 1 0 auto;
+    border: none;
+    background: transparent;
+    color: var(--color-texto-suave);
+    padding: 11px 16px;
+    border-radius: 11px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.ficha-tab:hover { color: var(--color-texto); background: var(--color-fondo); }
+.ficha-tab.activa { background: var(--color-primario-oscuro); color: #fff; box-shadow: 0 6px 14px -8px var(--color-primario-oscuro); }
+.ficha-tab:focus-visible { outline: none; box-shadow: var(--anillo-foco); }
+
+.ficha-panel { animation: aparecer 0.22s ease; }
+.ficha-panel-ayuda { margin: -4px 0 16px; font-size: 13px; color: var(--color-texto-suave); }
+.ficha-subtitulo { margin: 28px 0 12px; }
+#carpetaVetContenedor { padding: 22px; }
+
+/* Datos: las dos secciones del formulario lado a lado cuando caben */
+.ficha-datos { padding: 26px; }
+.ficha-form-secciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 8px 36px;
+}
+.ficha-form-secciones .seccion-titulo { margin-top: 0; }
+.ficha-form-secciones > div { margin-bottom: 12px; }
 
 .edad-en-vivo { padding: 12px 4px; font-size: 14px; font-weight: 600; color: var(--color-primario); }
+.mascota-form-acciones { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
 
-.mascota-form-acciones {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+@media (max-width: 760px) {
+    .ficha-cabecera { grid-template-columns: auto minmax(0, 1fr); gap: 16px; padding: 18px; }
+    .ficha-foto { width: 96px; height: 96px; border-radius: 22px; font-size: 42px; }
+    .ficha-identidad h2 { font-size: 23px; }
+    .ficha-chips { gap: 8px; }
+    .ficha-chip { min-width: 0; padding: 7px 11px; }
+    .ficha-chip b { font-size: 13px; }
+    .ficha-cambiar-foto { grid-column: 1 / -1; justify-self: start; }
+    .ficha-tab { flex: 0 0 auto; padding: 10px 13px; font-size: 13px; }
+    .ficha-datos { padding: 18px; }
 }
-
-/* ── Pulido visual ───────────────────────────────────────────── */
-.mascota-card { box-shadow: var(--sombra-sm); transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
-.mascota-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); border-color: color-mix(in srgb, var(--color-primario) 40%, var(--color-borde)); }
-.mascota-card-foto { background: linear-gradient(160deg, color-mix(in srgb, var(--color-primario) 10%, var(--color-fondo)), color-mix(in srgb, var(--color-secundario) 12%, var(--color-fondo))); }
-.mascota-card-info h3 { font-size: 17px; font-weight: 700; }
-@media (prefers-reduced-motion: reduce) { .mascota-card:hover { transform: none; } }
+@media (max-width: 420px) {
+    .ficha-cabecera { grid-template-columns: 1fr; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { .mascota-card:hover { transform: none; } .ficha-panel { animation: none; } }

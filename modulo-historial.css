@@ -24,7 +24,7 @@
 }
 .historial-tab.activo { background: var(--color-primario-oscuro); color: #fff; border-color: var(--color-primario-oscuro); }
 
-.historial-panel { max-width: 760px; }
+.historial-panel { min-width: 0; }
 
 .historial-form-card { margin-bottom: 20px; }
 .historial-form .field-group { margin-bottom: 14px; }

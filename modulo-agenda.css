@@ -2,7 +2,7 @@
    MODULO-AGENDA.CSS
    ================================================================ */
 
-.agenda-lista { display: flex; flex-direction: column; max-width: 760px; }
+.agenda-lista { display: flex; flex-direction: column; }
 
 .agenda-fila {
     display: flex;
@@ -19,3 +19,52 @@
 .agenda-fila-sub { font-size: 12px; color: var(--color-texto-suave); }
 .agenda-fila-acciones { display: flex; gap: 8px; }
 .agenda-fila-acciones .btn-secundario { padding: 7px 12px; font-size: 12px; }
+
+/* ── Grupos y origen de cada fecha ─────────────────────────────── */
+.agenda-grupo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 18px 0 2px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-texto-suave);
+}
+.agenda-grupo:first-child { margin-top: 14px; }
+.agenda-grupo span {
+    min-width: 20px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    font-size: 11px;
+    text-align: center;
+}
+.agenda-grupo-atrasados { color: var(--color-error); }
+.agenda-grupo-hoy { color: var(--color-primario-oscuro); }
+:root[data-theme="dark"] .agenda-grupo-hoy { color: var(--color-primario); }
+
+.agenda-fila { padding: 14px 0; }
+.agenda-fila-icono {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-fondo);
+    font-size: 19px;
+}
+.agenda-fila-cita .agenda-fila-icono,
+.agenda-fila-clinica .agenda-fila-icono { background: color-mix(in srgb, var(--color-primario) 14%, var(--color-fondo)); }
+.agenda-origen {
+    align-self: flex-start;
+    margin-top: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-texto-suave);
+}
+.agenda-origen-clinica { color: var(--color-primario-oscuro); }
+:root[data-theme="dark"] .agenda-origen-clinica { color: var(--color-primario); }

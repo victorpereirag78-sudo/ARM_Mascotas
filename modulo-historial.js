@@ -102,7 +102,7 @@ const Historial = (() => {
             <div class="historial-tabs">
                 ${TABS.map((t) => `<button type="button" class="historial-tab ${tabActiva === t.id ? 'activo' : ''}" data-tab="${t.id}">${t.etiqueta}</button>`).join('')}
             </div>
-            <div class="historial-panel">${renderTab(tabActiva)}</div>
+            <div class="historial-panel form-lateral">${renderTab(tabActiva)}</div>
         `;
         wireEventos();
     }
@@ -277,16 +277,25 @@ const Historial = (() => {
     // ── Vacunas ──────────────────────────────────────────────────
     function tabVacunas() {
         const lista = datos.vacunas;
-        const filas = lista.map((v) => `
+        // La lista viene de la más nueva a la más antigua: si la misma vacuna
+        // ya se volvió a poner, la dosis anterior figura como renovada, no vencida.
+        const vistas = new Set();
+        const filas = lista.map((v) => {
+            const clave = (v.nombre || '').trim().toLowerCase();
+            const renovada = vistas.has(clave);
+            vistas.add(clave);
+            return `
             <div class="historial-fila">
                 <div class="historial-fila-info">
                     <strong>${esc(v.nombre)}</strong>
                     <span class="historial-fila-sub">Aplicada: ${Utils.formatearFecha(v.fecha)}${v.lote ? ' · Lote ' + esc(v.lote) : ''}</span>
                 </div>
-                ${v.proxima_dosis_fecha ? `<div class="historial-fila-estado"><span class="historial-fila-etiqueta">Próxima dosis</span>${estadoFecha(v.proxima_dosis_fecha)}</div>` : ''}
+                ${v.proxima_dosis_fecha ? `<div class="historial-fila-estado"><span class="historial-fila-etiqueta">Próxima dosis</span>${renovada
+                    ? '<span class="badge-estado badge-aprobado">Renovada</span>' : estadoFecha(v.proxima_dosis_fecha)}</div>` : ''}
                 <button class="btn-peligro btn-historial-eliminar" data-tabla="mascotas_vacunas" data-id="${v.id}">Eliminar</button>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         return `
             ${formularioTab('vacunas', 'Registrar vacuna', `

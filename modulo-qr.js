@@ -29,6 +29,29 @@ const QR = (() => {
         ]);
         alergias = al || [];
         medicamentosActivos = (meds || []).map((m) => m.nombre);
+        await cargarDeLaClinica();
+    }
+
+    // Lo que registró su veterinaria (ARM Veterinaria) también cuenta en una
+    // emergencia: alergias de los antecedentes, tratamientos vigentes y la
+    // clínica como veterinario habitual. Sin clínica conectada, queda vacío.
+    let clinica = { alergias: [], medicamentos: [], clinicas: [] };
+    async function cargarDeLaClinica() {
+        clinica = { alergias: [], medicamentos: [], clinicas: [] };
+        if (!Auth.puedeAcceder('panel-veterinaria')) return;
+        const { data, error } = await db.rpc('vet_app_historial', { p_mascota_app: mascota.id });
+        if (error || !data) return;
+        const nombreClinica = (id) => ((data.clinicas || []).find((c) => c.clinica_id === id || c.id === id) || {}).clinica;
+        clinica.alergias = (data.antecedentes || []).filter((a) => a.alergias).map((a) => ({ texto: a.alergias, clinica: a.clinica || nombreClinica(a.clinica_id) }));
+        clinica.medicamentos = (data.tratamientos || []).filter((t) => t.vigente).map((t) => t.nombre);
+        clinica.clinicas = data.clinicas || [];
+    }
+
+    function textoVeterinario() {
+        if (clinica.clinicas.length) {
+            return clinica.clinicas.map((c) => esc(c.clinica) + (c.telefono_emergencia || c.telefono ? ' · ' + esc(c.telefono_emergencia || c.telefono) : '')).join('<br>');
+        }
+        return mascota.veterinario_habitual_id ? 'Asignado' : 'Sin veterinario asignado';
     }
 
     function render() {
@@ -51,9 +74,13 @@ const QR = (() => {
             <div class="card sos-card">
                 <h3 class="seccion-titulo">🆘 Ficha SOS</h3>
                 <div class="sos-datos">
-                    <div class="sos-item"><span class="sos-etiqueta">Alergias</span><span>${alergias.length ? alergias.map((a) => esc(a.nombre)).join(', ') : 'Ninguna registrada'}</span></div>
-                    <div class="sos-item"><span class="sos-etiqueta">Medicamentos activos</span><span>${medicamentosActivos.length ? medicamentosActivos.map(esc).join(', ') : 'Ninguno'}</span></div>
-                    <div class="sos-item"><span class="sos-etiqueta">Veterinario</span><span>${mascota.veterinario_habitual_id ? 'Asignado' : 'Sin veterinario asignado'}</span></div>
+                    <div class="sos-item"><span class="sos-etiqueta">Alergias</span><span>${alergias.length || clinica.alergias.length
+                        ? [...alergias.map((a) => esc(a.nombre)), ...clinica.alergias.map((a) => `${esc(a.texto)} <small class="sos-origen">🏥 ${esc(a.clinica || 'su veterinaria')}</small>`)].join(', ')
+                        : 'Ninguna registrada'}</span></div>
+                    <div class="sos-item"><span class="sos-etiqueta">Medicamentos activos</span><span>${medicamentosActivos.length || clinica.medicamentos.length
+                        ? [...medicamentosActivos.map(esc), ...clinica.medicamentos.map((n) => `${esc(n)} <small class="sos-origen">🏥</small>`)].join(', ')
+                        : 'Ninguno'}</span></div>
+                    <div class="sos-item"><span class="sos-etiqueta">Veterinario</span><span>${textoVeterinario()}</span></div>
                     <div class="sos-item"><span class="sos-etiqueta">Contacto dueño</span><span>${esc(perfil.telefono) || 'Sin teléfono'}</span></div>
                     <div class="sos-item"><span class="sos-etiqueta">Contacto de emergencia</span><span>${perfil.contacto_emergencia_nombre ? esc(perfil.contacto_emergencia_nombre) + (perfil.contacto_emergencia_telefono ? ' · ' + esc(perfil.contacto_emergencia_telefono) : '') : 'Sin registrar'}</span></div>
                 </div>

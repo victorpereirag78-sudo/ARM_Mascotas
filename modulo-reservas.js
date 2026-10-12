@@ -214,6 +214,8 @@ const VetExtra = (() => {
                             </div>
                             <div class="vet-cita-lado">
                                 ${chip(e[0], e[1])}
+                                ${c.puede_confirmar ? '<button class="btn-primario btn-chico" data-confirmar-cita>✓ Confirmar asistencia</button>' : ''}
+                                ${c.estado === 'confirmada' && c.confirmada_via ? '<span class="vet-nota">Asistencia confirmada</span>' : ''}
                                 ${c.puede_cancelar ? '<button class="vet-enlace" data-cancelar>Cancelar</button>' : ''}
                             </div>
                         </li>`;
@@ -235,6 +237,17 @@ const VetExtra = (() => {
                 Utils.toast('Hora cancelada. La clínica ya lo sabe.', 'info');
                 await recargar();
             } catch (e) { mensaje(seccion.querySelector('.field-msg'), e.message, true); }
+        }));
+        // Confirmar asistencia: lo mismo que el botón del aviso por WhatsApp,
+        // y en la agenda de la clínica queda "confirmó desde la app".
+        seccion.querySelectorAll('[data-confirmar-cita]').forEach((b) => b.addEventListener('click', async () => {
+            const c = citas.find((x) => x.id === b.closest('[data-cita]').dataset.cita);
+            b.disabled = true;
+            try {
+                await rpc('vet_app_confirmar_cita', { p_cita: c.id });
+                Utils.toast(`¡Listo! ${c.clinica.nombre} sabe que irás con ${c.mascota.nombre}.`, 'exito');
+                await recargar();
+            } catch (e) { b.disabled = false; mensaje(seccion.querySelector('.field-msg'), e.message, true); }
         }));
         const btn = seccion.querySelector('[data-reservar]');
         if (btn) btn.addEventListener('click', () => abrirReserva(seccion, clinicas.filter((c) => c.reservas), recargar));

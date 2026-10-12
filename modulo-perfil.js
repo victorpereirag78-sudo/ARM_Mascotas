@@ -17,18 +17,23 @@ const Perfil = (() => {
     function plantilla(p) {
         const iniciales = ((p.nombre || '?')[0] || '?').toUpperCase();
         return `
-            <div class="form-panel-embed">
-                <div class="perfil-avatar-fila">
+            <div class="perfil-layout">
+                <aside class="card perfil-tarjeta">
                     <div class="perfil-avatar" id="avatarPreview">
                         ${p.foto_url ? `<img src="${p.foto_url}" alt="Foto de perfil">` : iniciales}
                     </div>
+                    <h2 class="perfil-nombre">${esc([p.nombre, p.apellido].filter(Boolean).join(' ')) || 'Mi perfil'}</h2>
+                    <p class="perfil-correo">${esc(p.correo)}</p>
                     <label class="btn-secundario btn-subir-foto">
-                        Cambiar foto
+                        📷 Cambiar foto
                         <input type="file" id="inputFotoPerfil" accept="image/*" hidden>
                     </label>
-                </div>
+                    <p class="perfil-ayuda">Tus datos de contacto aparecen en la ficha SOS y el pasaporte de tus mascotas, según lo que autorices en cada una.</p>
+                </aside>
 
-                <form id="formPerfil" novalidate>
+                <form id="formPerfil" class="card perfil-form" novalidate>
+                    <div class="perfil-secciones">
+                    <div class="perfil-bloque">
                     <h3 class="seccion-titulo">Datos personales</h3>
                     <div class="grid-2">
                         <div class="field-group">
@@ -53,6 +58,8 @@ const Perfil = (() => {
                         </div>
                     </div>
 
+                    </div>
+                    <div class="perfil-bloque">
                     <h3 class="seccion-titulo">Ubicación</h3>
                     <div class="grid-2">
                         <div class="field-group field-ancho-completo">
@@ -73,6 +80,8 @@ const Perfil = (() => {
                         </div>
                     </div>
 
+                    </div>
+                    <div class="perfil-bloque">
                     <h3 class="seccion-titulo">Contacto de emergencia</h3>
                     <div class="grid-2">
                         <div class="field-group">
@@ -85,6 +94,8 @@ const Perfil = (() => {
                         </div>
                     </div>
 
+                    </div>
+                    </div>
                     <div class="field-msg" id="perfilMensaje"></div>
                     <button type="submit" class="btn-primario btn-ancho-auto" id="btnGuardarPerfil">Guardar cambios</button>
                 </form>
