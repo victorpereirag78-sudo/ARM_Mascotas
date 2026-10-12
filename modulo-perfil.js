@@ -122,7 +122,7 @@ const Perfil = (() => {
         ['¿Cómo comparto a mi mascota con mi familia?', 'En <b>Compartir</b> escribe el correo de la persona y elige si solo puede ver o también editar. Ella acepta la invitación desde su propia cuenta de ARM Mascotas.'],
         ['¿Cómo instalo la app en mi teléfono?', 'Toca <b>Instalar app</b> en el menú o abre <a href="/instalar.html">la guía de instalación</a>. Queda en tu pantalla de inicio como cualquier app, sin pasar por una tienda.'],
         ['No me llegan las notificaciones', 'Actívalas en <b>Mi veterinaria → Avisos de tu veterinaria</b> y acepta el permiso del navegador. En iPhone, primero instala la app en la pantalla de inicio y ábrela desde ahí.'],
-        ['¿Cómo corrijo o elimino mis datos?', 'Tus datos y los de cada mascota los editas aquí y en cada ficha. Para lo que guarda una clínica, usa <b>Mi veterinaria → Tus datos personales</b>. Para cerrar tu cuenta, revisa la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.'],
+        ['¿Cómo corrijo o elimino mis datos?', 'Tus datos y los de cada mascota los editas aquí y en cada ficha. Para lo que guarda una clínica, usa <b>Mi veterinaria → Tus datos personales</b>. Para cerrar tu cuenta, escríbenos a <a href="mailto:privacidad@armsistemas.cl">privacidad@armsistemas.cl</a> desde el correo con que te registraste.'],
         ['¿La app tiene costo?', 'No. ARM Mascotas es gratis para los dueños de mascotas.']
     ];
 
