@@ -17,6 +17,8 @@ const Dashboard = (() => {
         wireEventos(el);
         cargarProximos(el, mascotas);
         if (window.VetApp) VetApp.decorarDashboard(el);
+        // Primer ingreso: recorrido de bienvenida (se marca como visto al cerrarlo).
+        if (window.Tutorial) Tutorial.iniciarSiCorresponde();
     }
 
     async function cargarPendientes(idsMascotas) {
