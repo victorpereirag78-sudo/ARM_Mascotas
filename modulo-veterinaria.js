@@ -66,9 +66,11 @@ const VetApp = (() => {
         let notificaciones = [];
         let presupuestos = [];
         let extra = { citas: [], encuestas: [], consentimientos: [], privacidad: [] };
+        let pedidos = [];
         try {
-            [clinicas, notificaciones, presupuestos, extra] = await Promise.all([rpc('vet_app_mis_clinicas'), rpc('vet_app_notificaciones', { p_limite: 60 }),
-                rpc('vet_app_presupuestos').catch(() => []), window.VetExtra ? VetExtra.cargar() : extra]);
+            [clinicas, notificaciones, presupuestos, extra, pedidos] = await Promise.all([rpc('vet_app_mis_clinicas'), rpc('vet_app_notificaciones', { p_limite: 60 }),
+                rpc('vet_app_presupuestos').catch(() => []), window.VetExtra ? VetExtra.cargar() : extra,
+                window.VetCatalogo ? VetCatalogo.cargar() : []]);
         } catch (e) {
             el.innerHTML = `<div class="estado-vacio"><p>No pudimos cargar la información de tu veterinaria: ${h(e.message)}</p></div>`;
             return;
@@ -80,6 +82,7 @@ const VetApp = (() => {
                 ${window.VetExtra ? VetExtra.htmlEncuestas(extra.encuestas) + VetExtra.htmlConsentimientos(extra.consentimientos) : ''}
                 ${presupuestos.length ? `<section class="card vet-seccion" id="vetPresupuestos">${Presupuestos.html(presupuestos)}</section>` : ''}
                 ${window.VetExtra && clinicas.length ? VetExtra.htmlCitas(extra.citas, clinicas) : ''}
+                ${window.VetCatalogo && clinicas.length ? VetCatalogo.html(pedidos, clinicas) : ''}
                 <section class="card vet-seccion" id="vetSeccionVincular"></section>
                 <section class="card vet-seccion">
                     <div class="vet-seccion-cabecera">
@@ -130,17 +133,19 @@ const VetApp = (() => {
             VetExtra.conectarCitas(el, extra.citas, clinicas, recargar);
             VetExtra.conectarPrivacidad(el, recargar);
         }
+        if (window.VetCatalogo) VetCatalogo.conectar(el, pedidos, clinicas, () => init(el));
         // Llegó desde un push o un enlace: directo a la sección.
         const seccion = sessionStorage.getItem('arm_vet_seccion');
         sessionStorage.removeItem('arm_vet_seccion');
         if (seccion === 'presupuestos') Presupuestos.mostrar(el);
         else if (seccion === 'reservar' && window.VetExtra && el.querySelector('#vetCitas [data-reservar]')) el.querySelector('#vetCitas [data-reservar]').click();
-        else if (seccion && window.VetExtra) VetExtra.mostrar(el, { encuestas: '#vetEncuestas', consentimientos: '#vetConsentimientos', citas: '#vetCitas', privacidad: '#vetPrivacidad' }[seccion] || '#vetCitas');
+        else if (seccion === 'catalogo' && el.querySelector('#vetCatalogo [data-ver-catalogo]')) { VetExtra.mostrar(el, '#vetCatalogo'); el.querySelector('#vetCatalogo [data-ver-catalogo]').click(); }
+        else if (seccion && window.VetExtra) VetExtra.mostrar(el, { encuestas: '#vetEncuestas', consentimientos: '#vetConsentimientos', citas: '#vetCitas', privacidad: '#vetPrivacidad', pedidos: '#vetCatalogo' }[seccion] || '#vetCitas');
         actualizarInsignia();
     }
 
     // Avisos que abren una sección de "Mi veterinaria" (si existe; si no, la carpeta de la mascota).
-    const SECCION_AVISO = { encuesta: '#vetEncuestas', consentimiento: '#vetConsentimientos', cita: '#vetCitas' };
+    const SECCION_AVISO = { encuesta: '#vetEncuestas', consentimiento: '#vetConsentimientos', cita: '#vetCitas', apartado: '#vetCatalogo' };
 
     function itemNotificacion(n) {
         return `
@@ -323,6 +328,16 @@ const VetApp = (() => {
         try { resumen = await rpc('vet_app_resumen'); } catch (_e) { return; }
         if (!resumen) return;
         window.appData.vetResumen = resumen; // lo usan los accesos directos del inicio
+        // Acceso directo al catálogo solo si alguna de sus clínicas lo publica.
+        const nav = el.querySelector('#dashAccesos');
+        if (nav && (resumen.clinicas || []).some((c) => c.catalogo) && !nav.querySelector('[data-ir="productos"]')) {
+            const b = document.createElement('button');
+            b.className = 'acceso-rapido';
+            b.dataset.ir = 'productos';
+            b.innerHTML = '<span>🛒</span>Productos';
+            b.addEventListener('click', () => { sessionStorage.setItem('arm_vet_seccion', 'catalogo'); irAPanel('panel-veterinaria'); });
+            nav.insertBefore(b, nav.children[2] || null);
+        }
         (resumen.mascotas || []).forEach((m) => {
             const card = el.querySelector(`.dashboard-card[data-id="${m.mascota_app_id}"]`);
             if (!card) return;
@@ -352,11 +367,13 @@ const VetApp = (() => {
             if (cab) cab.after(aviso); else el.prepend(aviso);
         }
         if (window.VetExtra) {
-            const [enc, cons, citas] = await Promise.all([rpc('vet_app_encuestas').catch(() => []), rpc('vet_app_consentimientos').catch(() => []),
-                rpc('vet_app_mis_citas').catch(() => [])]);
+            const [enc, cons, citas, pedidos] = await Promise.all([rpc('vet_app_encuestas').catch(() => []), rpc('vet_app_consentimientos').catch(() => []),
+                rpc('vet_app_mis_citas').catch(() => []), rpc('vet_app_mis_apartados').catch(() => [])]);
+            const pedidosListos = (pedidos || []).filter((p) => p.estado === 'listo');
             const porFirmar = (cons || []).filter((k) => k.estado === 'pendiente');
             const porConfirmar = (citas || []).filter((c) => c.puede_confirmar);
             const banners = [
+                pedidosListos.length && [`📦 Tienes <b>${pedidosListos.length}</b> ${pedidosListos.length === 1 ? 'pedido listo' : 'pedidos listos'} para retirar en tu veterinaria <span>Ver →</span>`, 'pedidos'],
                 porConfirmar.length && [`📅 Tienes <b>${porConfirmar.length}</b> ${porConfirmar.length === 1 ? 'hora' : 'horas'} en tu veterinaria por confirmar <span>Confirmar →</span>`, 'citas'],
                 porFirmar.length && [`✍️ Tienes <b>${porFirmar.length}</b> ${porFirmar.length === 1 ? 'consentimiento' : 'consentimientos'} por firmar <span>Firmar →</span>`, 'consentimientos'],
                 (enc || []).length && [`⭐ Cuéntanos cómo te atendieron: <b>${enc.length}</b> ${enc.length === 1 ? 'encuesta' : 'encuestas'} de 10 segundos <span>Responder →</span>`, 'encuestas']

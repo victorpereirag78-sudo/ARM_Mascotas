@@ -199,6 +199,10 @@ const Dashboard = (() => {
             sessionStorage.setItem('arm_vet_seccion', ir === 'reservar' ? 'reservar' : 'citas');
             return irAPanel('panel-veterinaria');
         }
+        if (ir === 'productos') {
+            sessionStorage.setItem('arm_vet_seccion', 'catalogo');
+            return irAPanel('panel-veterinaria');
+        }
         if (ir === 'agenda') return irAPanel('panel-agenda');
         if (ir === 'compartir') return irAPanel('panel-compartir');
         const destino = SECCION_FICHA[ir];

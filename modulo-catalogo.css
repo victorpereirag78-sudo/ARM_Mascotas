@@ -1,0 +1,49 @@
+/* ================================================================
+   MODULO-CATALOGO.CSS — Mi veterinaria: productos y pedidos para retirar
+   ================================================================ */
+
+.vet-pedidos { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.vet-pedido { border: 1px solid var(--color-borde); border-radius: 12px; padding: 12px; background: var(--color-superficie); }
+.vet-pedido.cerrado { opacity: .7; }
+.vet-pedido-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.vet-pedido-titulo { margin: 0; font-weight: 700; font-size: 14px; }
+.vet-pedido-cab .vet-nota { margin-top: 2px; }
+.vet-pedido-items { list-style: none; margin: 10px 0 0; padding: 0; font-size: 13px; }
+.vet-pedido-items li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--color-borde); }
+.vet-pedido-items li:first-child { border-top: 0; }
+.vet-pedido-items li span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vet-pedido-total { font-weight: 700; }
+.vet-pedido-aviso { margin: 10px 0 0; padding: 8px 10px; border-radius: 10px; font-size: 13px;
+    background: color-mix(in srgb, var(--color-exito) 12%, transparent); }
+.vet-pedido .vet-enlace { margin-top: 8px; }
+
+.vet-cat-buscar { margin: 12px 0 10px; }
+.vet-cat-chips { margin-bottom: 4px; }
+.vet-cat-chips .vet-opcion { padding: 6px 12px; font-size: 13px; }
+.vet-productos { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.vet-producto { display: flex; gap: 12px; align-items: center; border: 1px solid var(--color-borde); border-radius: 12px; padding: 10px 12px;
+    background: var(--color-superficie); }
+.vet-producto.agotado { opacity: .6; }
+.vet-producto-emoji { font-size: 26px; line-height: 1; flex-shrink: 0; }
+.vet-producto-cuerpo { flex: 1; min-width: 0; }
+.vet-producto-nombre { margin: 0; font-weight: 700; font-size: 14px; }
+.vet-producto-cuerpo .vet-nota { margin-top: 2px; }
+.vet-producto-precio { margin: 4px 0 0; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.vet-producto-precio small { font-weight: 400; color: var(--color-texto-suave); font-size: 11px; }
+.vet-producto-lado { flex-shrink: 0; }
+.vet-cantidad { display: inline-flex; align-items: center; border: 1px solid var(--color-borde); border-radius: 999px; overflow: hidden; }
+.vet-cantidad button { width: 34px; height: 34px; border: 0; background: transparent; color: var(--color-texto); font-size: 18px; font-weight: 700; cursor: pointer; }
+.vet-cantidad button:disabled { opacity: .4; cursor: default; }
+.vet-cantidad span { min-width: 24px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Barra del pedido: queda a la vista mientras se recorre el catálogo. */
+.vet-carrito { position: sticky; bottom: 12px; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px;
+    padding: 10px 14px; border-radius: 14px; background: var(--color-superficie); border: 1px solid var(--color-primario);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .12); font-size: 14px; }
+.vet-carrito[hidden] { display: none; }
+.vet-pedido-cab .vet-chip { white-space: nowrap; flex-shrink: 0; }
+
+/* En el celular la barra de navegación inferior es fija: la del pedido sube sobre ella. */
+@media (max-width: 900px) {
+    .vet-carrito { bottom: calc(78px + env(safe-area-inset-bottom)); }
+}
