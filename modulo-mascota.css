@@ -149,8 +149,8 @@
 @media (prefers-reduced-motion: reduce) { .mascota-card:hover { transform: none; } .ficha-panel { animation: none; } }
 
 /* Selector de especie con íconos (mismo catálogo que la veterinaria) */
-.grid-2 > .field-ancho { grid-column: 1 / -1; }
-.especie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.grid-2 > .field-ancho { grid-column: 1 / -1; min-width: 0; }
+.especie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(80px, 100%), 1fr)); gap: 8px; min-width: 0; }
 .especie-op { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 12px; cursor: pointer;
     border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); font: inherit; font-size: 13px; font-weight: 600; }
 .especie-op span { font-size: 26px; line-height: 1; }
