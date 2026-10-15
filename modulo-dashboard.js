@@ -104,9 +104,9 @@ const Dashboard = (() => {
     function tarjetaResumen(m) {
         const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie);
         const dias = Utils.diasParaCumpleanos(m.fecha_nacimiento);
-        const emojiEspecie = m.especie === 'perro' ? '🐶' : m.especie === 'gato' ? '🐱' : '🐾';
+        const emojiEspecie = Utils.emojiEspecie(m);
         const pendientes = pendientesPorMascota[m.id] || { proximaVacuna: null, proximaDesparasitacion: null, gastoAnio: 0 };
-        const sub = [esc(m.raza) || capitalizar(m.especie), m.sexo ? capitalizar(m.sexo) : ''].filter(Boolean).join(' · ');
+        const sub = [esc(m.raza) || Utils.nombreEspecie(m), m.sexo ? capitalizar(m.sexo) : ''].filter(Boolean).join(' · ');
 
         return `
             <article class="card dashboard-card" data-id="${m.id}">
@@ -229,7 +229,7 @@ const Dashboard = (() => {
                 <h3>¿De qué mascota?</h3>
                 <div class="elegir-mascota-lista">
                     ${mascotas.map((m) => `<button type="button" data-id="${m.id}">
-                        <span class="elegir-mascota-foto">${m.foto_url ? `<img src="${m.foto_url}" alt="">` : (m.especie === 'gato' ? '🐱' : m.especie === 'perro' ? '🐶' : '🐾')}</span>
+                        <span class="elegir-mascota-foto">${m.foto_url ? `<img src="${m.foto_url}" alt="">` : Utils.emojiEspecie(m)}</span>
                         ${esc(m.nombre)}</button>`).join('')}
                 </div>
                 <button type="button" class="btn-secundario elegir-mascota-cancelar">Cancelar</button>

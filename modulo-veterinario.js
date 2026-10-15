@@ -44,7 +44,7 @@ const Veterinario = (() => {
     async function cargarAutorizaciones() {
         const { data, error } = await db
             .from('mascotas_autorizaciones_veterinario')
-            .select('*, mascotas(id, nombre, especie, raza, foto_url, fecha_nacimiento, dueno_id, mascotas_perfiles(nombre, apellido, telefono, correo))')
+            .select('*, mascotas(id, nombre, especie, especie_codigo, raza, foto_url, fecha_nacimiento, dueno_id, mascotas_perfiles(nombre, apellido, telefono, correo))')
             .eq('veterinario_id', miPerfilVet.id)
             .eq('activo', true)
             .order('created_at', { ascending: false });
@@ -80,7 +80,7 @@ const Veterinario = (() => {
         const tarjetas = autorizaciones.map((a) => {
             const m = a.mascotas;
             const dueno = m.mascotas_perfiles;
-            const emojiEspecie = m.especie === 'perro' ? '🐶' : m.especie === 'gato' ? '🐱' : '🐾';
+            const emojiEspecie = Utils.emojiEspecie(m);
             return `
                 <div class="card vet-mascota-card" data-id="${m.id}">
                     <div class="mascota-card-foto vet-mascota-foto">
@@ -88,7 +88,7 @@ const Veterinario = (() => {
                     </div>
                     <div class="vet-mascota-info">
                         <h3>${esc(m.nombre)}</h3>
-                        <p class="dashboard-card-sub">${esc(m.raza) || capitalizar(m.especie)}</p>
+                        <p class="dashboard-card-sub">${esc(m.raza) || Utils.nombreEspecie(m)}</p>
                         <p class="vet-mascota-dueno">Dueño: ${esc(`${dueno?.nombre || ''} ${dueno?.apellido || ''}`.trim())}${dueno?.telefono ? ' · ' + esc(dueno.telefono) : ''}</p>
                         <span class="badge-estado badge-aprobado">${etiquetaPermiso(a.nivel_permiso)}</span>
                     </div>
@@ -110,11 +110,11 @@ const Veterinario = (() => {
 
             <div class="card vet-detalle-cabecera">
                 <div class="dashboard-card-foto">
-                    ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${m.especie === 'perro' ? '🐶' : m.especie === 'gato' ? '🐱' : '🐾'}</span>`}
+                    ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${Utils.emojiEspecie(m)}</span>`}
                 </div>
                 <div>
                     <h2>${esc(m.nombre)}</h2>
-                    <p class="dashboard-card-sub">${esc(m.raza) || capitalizar(m.especie)} · ${Utils.textoEdad(edad)}</p>
+                    <p class="dashboard-card-sub">${esc(m.raza) || Utils.nombreEspecie(m)} · ${Utils.textoEdad(edad)}</p>
                     <p class="vet-mascota-dueno">Dueño: ${esc(`${dueno?.nombre || ''} ${dueno?.apellido || ''}`.trim())} · ${esc(dueno?.telefono) || 'sin teléfono'} · ${esc(dueno?.correo)}</p>
                 </div>
             </div>

@@ -110,11 +110,11 @@ const Mascota = (() => {
         return `
             <article class="mascota-card" data-id="${m.id}" tabindex="0" role="button" aria-label="Abrir la ficha de ${esc(m.nombre)}">
                 <div class="mascota-card-foto" ${m.foto_url ? `style="--foto:url('${m.foto_url}')"` : ''}>
-                    ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${emoji(m.especie)}</span>`}
+                    ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${Utils.emojiEspecie(m)}</span>`}
                 </div>
                 <div class="mascota-card-info">
                     <h3>${esc(m.nombre)}</h3>
-                    <p>${esc(m.raza) || capitalizar(m.especie)}${m.sexo ? ' · ' + capitalizar(m.sexo) : ''}</p>
+                    <p>${esc(m.raza) || Utils.nombreEspecie(m)}${m.sexo ? ' · ' + capitalizar(m.sexo) : ''}</p>
                     <div class="mascota-card-chips">
                         <span>🎂 ${Utils.textoEdad(edad)}</span>
                         ${m.peso_actual ? `<span>⚖️ ${m.peso_actual} kg</span>` : ''}
@@ -145,7 +145,7 @@ const Mascota = (() => {
     function plantillaFicha(m) {
         const edad = Utils.calcularEdadMascota(m.fecha_nacimiento, m.especie);
         const dias = Utils.diasParaCumpleanos(m.fecha_nacimiento);
-        const sub = [esc(m.raza), capitalizar(m.especie), m.sexo ? capitalizar(m.sexo) : '', m.estado_reproductivo === 'esterilizado' ? 'Esterilizado' : '']
+        const sub = [esc(m.raza), Utils.nombreEspecie(m), m.sexo ? capitalizar(m.sexo) : '', m.estado_reproductivo === 'esterilizado' ? 'Esterilizado' : '']
             .filter(Boolean).join(' · ');
         const chip = (etiqueta, valor) => (valor ? `<div class="ficha-chip"><small>${etiqueta}</small><b>${valor}</b></div>` : '');
 
@@ -157,7 +157,7 @@ const Mascota = (() => {
 
                 <section class="card ficha-cabecera">
                     <div class="ficha-foto" id="avatarMascotaPreview" ${m.foto_url ? `style="--foto:url('${m.foto_url}')"` : ''}>
-                        ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${emoji(m.especie)}</span>`}
+                        ${m.foto_url ? `<img src="${m.foto_url}" alt="${esc(m.nombre)}">` : `<span>${Utils.emojiEspecie(m)}</span>`}
                     </div>
                     <div class="ficha-identidad">
                         <h2>${esc(m.nombre)}</h2>
@@ -251,19 +251,19 @@ const Mascota = (() => {
                             <label>Nombre *</label>
                             <div class="input-wrap"><input type="text" id="mNombre" value="${esc(m.nombre)}" required></div>
                         </div>
-                        <div class="field-group">
+                        <div class="field-group field-ancho">
                             <label>Especie *</label>
-                            <div class="input-wrap">
-                                <select id="mEspecie" required>
-                                    <option value="perro" ${sel(m.especie, 'perro')}>Perro</option>
-                                    <option value="gato" ${sel(m.especie, 'gato')}>Gato</option>
-                                    <option value="otro" ${sel(m.especie, 'otro')}>Otro</option>
-                                </select>
+                            <input type="hidden" id="mEspecie" value="${esc(m.especie || 'perro')}">
+                            <input type="hidden" id="mEspecieCodigo" value="${esc(m.especie_codigo || m.especie || 'perro')}">
+                            <div class="especie-grid" id="mEspecieGrid" role="radiogroup" aria-label="Especie">
+                                ${Object.entries(Utils.ESPECIES_CAT).map(([k, v]) => `<button type="button" class="especie-op ${(m.especie_codigo || m.especie || 'perro') === k ? 'activo' : ''}" role="radio"
+                                    aria-checked="${(m.especie_codigo || m.especie || 'perro') === k}" data-especie="${k}"><span>${v[0]}</span>${v[1]}</button>`).join('')}
                             </div>
                         </div>
                         <div class="field-group">
-                            <label>Raza</label>
-                            <div class="input-wrap"><input type="text" id="mRaza" value="${esc(m.raza)}"></div>
+                            <label>Raza o tipo</label>
+                            <div class="input-wrap"><input type="text" id="mRaza" list="mRazaLista" value="${esc(m.raza)}" placeholder="Elige de la lista o escríbela" autocomplete="off"></div>
+                            <datalist id="mRazaLista"></datalist>
                         </div>
                         <div class="field-group">
                             <label>Sexo</label>
@@ -357,7 +357,7 @@ const Mascota = (() => {
         contenedorActual.querySelectorAll('.ficha-tab').forEach((b) => b.addEventListener('click', () => mostrarPestana(b.dataset.pestana)));
 
         document.getElementById('mFechaNacimiento').addEventListener('input', actualizarEdadEnVivo);
-        document.getElementById('mEspecie').addEventListener('change', actualizarEdadEnVivo);
+        conectarEspecies();
         document.getElementById('formMascota').addEventListener('submit', guardar);
 
         const inputFoto = document.getElementById('inputFotoMascota');
@@ -365,6 +365,44 @@ const Mascota = (() => {
 
         const btnEliminar = document.getElementById('btnEliminarMascota');
         if (btnEliminar) btnEliminar.addEventListener('click', eliminar);
+    }
+
+    // ── Especie y raza (catálogo compartido con la veterinaria) ──
+    // Perro y gato se guardan con su enum; el resto como 'otro' más el código fino
+    // (la base mantiene ambos coherentes).
+    let catalogoRazas = null;
+    async function cargarRazas() {
+        if (catalogoRazas) return catalogoRazas;
+        try {
+            const { data, error } = await db.from('vet_razas').select('especie,nombre').order('nombre');
+            if (error) throw error;
+            catalogoRazas = data || [];
+        } catch (_e) { catalogoRazas = []; } // sin catálogo (sin red): la raza se escribe a mano
+        return catalogoRazas;
+    }
+
+    async function pintarRazas() {
+        const lista = document.getElementById('mRazaLista');
+        if (!lista) return;
+        const codigo = document.getElementById('mEspecieCodigo').value;
+        const razas = await cargarRazas();
+        lista.innerHTML = razas.filter((r) => r.especie === codigo).map((r) => `<option value="${esc(r.nombre)}"></option>`).join('');
+    }
+
+    function conectarEspecies() {
+        const grid = document.getElementById('mEspecieGrid');
+        if (!grid) return;
+        grid.querySelectorAll('.especie-op').forEach((b) => b.addEventListener('click', () => {
+            const codigo = b.dataset.especie;
+            const cambio = document.getElementById('mEspecieCodigo').value !== codigo;
+            document.getElementById('mEspecieCodigo').value = codigo;
+            document.getElementById('mEspecie').value = codigo === 'perro' || codigo === 'gato' ? codigo : 'otro';
+            grid.querySelectorAll('.especie-op').forEach((x) => { x.classList.toggle('activo', x === b); x.setAttribute('aria-checked', x === b ? 'true' : 'false'); });
+            if (cambio) document.getElementById('mRaza').value = '';
+            pintarRazas();
+            actualizarEdadEnVivo();
+        }));
+        pintarRazas();
     }
 
     function actualizarEdadEnVivo() {
@@ -383,6 +421,7 @@ const Mascota = (() => {
         const datos = {
             nombre: valor('mNombre'),
             especie: valor('mEspecie'),
+            especie_codigo: valor('mEspecieCodigo') || valor('mEspecie'),
             raza: valor('mRaza'),
             sexo: valor('mSexo') || null,
             fecha_nacimiento: valor('mFechaNacimiento') || null,
@@ -486,10 +525,6 @@ const Mascota = (() => {
 
     function sel(actual, esperado) {
         return actual === esperado ? 'selected' : '';
-    }
-
-    function emoji(especie) {
-        return especie === 'perro' ? '🐶' : especie === 'gato' ? '🐱' : '🐾';
     }
 
     function capitalizar(s) {

@@ -74,7 +74,7 @@ const Pasaporte = (() => {
             <div class="card pasaporte-card">
                 <div class="pasaporte-cabecera">
                     <div class="dashboard-card-foto">
-                        ${mascota.foto_url ? `<img src="${mascota.foto_url}" alt="${esc(mascota.nombre)}">` : `<span>${mascota.especie === 'perro' ? '🐶' : mascota.especie === 'gato' ? '🐱' : '🐾'}</span>`}
+                        ${mascota.foto_url ? `<img src="${mascota.foto_url}" alt="${esc(mascota.nombre)}">` : `<span>${Utils.emojiEspecie(mascota)}</span>`}
                     </div>
                     <div>
                         <h2>${esc(mascota.nombre)}</h2>

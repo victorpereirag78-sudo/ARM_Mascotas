@@ -28,6 +28,19 @@ const Utils = (() => {
         return `${String(p.dia).padStart(2, '0')}-${String(p.mes).padStart(2, '0')}-${p.anio}`;
     }
 
+    // ── Especies (mismo catálogo que ARM Veterinaria: vet_especies) ──
+    // Respaldo local con ícono y nombre; el catálogo completo de razas se
+    // lee de la base en modulo-mascota.js. especie_codigo es el código
+    // fino (conejo, ave…); si falta, se usa el enum perro/gato/otro.
+    const ESPECIES_CAT = {
+        perro: ['🐶', 'Perro'], gato: ['🐱', 'Gato'], conejo: ['🐰', 'Conejo'], ave: ['🐦', 'Ave'], roedor: ['🐹', 'Roedor'],
+        huron: ['🐾', 'Hurón'], reptil: ['🦎', 'Reptil'], caballo: ['🐴', 'Caballo'], cerdo: ['🐷', 'Cerdo'], pez: ['🐟', 'Pez'],
+        otro: ['🐾', 'Otra especie']
+    };
+    function codigoEspecie(m) { return (m && (m.especie_codigo || m.especie)) || 'otro'; }
+    function emojiEspecie(m) { return (ESPECIES_CAT[codigoEspecie(m)] || ESPECIES_CAT.otro)[0]; }
+    function nombreEspecie(m) { return (ESPECIES_CAT[codigoEspecie(m)] || ESPECIES_CAT.otro)[1]; }
+
     // ── Edad de mascota + edad humana equivalente ────────────────
     // Fórmula veterinaria no lineal para perro/gato:
     // año 1 ≈ 15 años humanos, año 2 suma ≈9 (total 24), cada año
@@ -177,6 +190,10 @@ const Utils = (() => {
         hoy: hoyISO,
         formatearFecha,
         calcularEdadMascota,
+        ESPECIES_CAT,
+        codigoEspecie,
+        emojiEspecie,
+        nombreEspecie,
         textoEdad,
         diasParaCumpleanos,
         esEmailValido,
