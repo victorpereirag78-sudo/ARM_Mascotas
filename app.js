@@ -68,8 +68,6 @@ const MENSAJES_CUENTA_BLOQUEADA = {
     construirMenu();
     wireHeaderYSidebar();
 
-    document.getElementById('usuarioResumen').textContent =
-        `${window.appData.perfil.nombre || ''} ${window.appData.perfil.apellido || ''}`.trim() || window.appData.perfil.correo;
 
     document.getElementById('btnLogout').addEventListener('click', async () => {
         await Auth.logout();
