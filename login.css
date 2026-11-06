@@ -137,7 +137,16 @@ button, input, select, textarea { font-family: inherit; }
     font-size: 13px;
     font-weight: 600;
 }
-.brand-footer { font-size: 13px; opacity: 0.75; }
+.brand-footer { font-size: 13px; opacity: 0.75; display: flex; flex-direction: column; gap: 4px; }
+.brand-arm-link {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.75;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s ease;
+}
+.brand-arm-link:hover { opacity: 1; text-decoration: underline; }
 
 /* En pantallas angostas, el panel de marca pasa a ser una franja
    delgada arriba (logo + nombre en línea) en vez de un bloque grande

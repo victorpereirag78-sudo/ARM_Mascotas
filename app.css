@@ -422,3 +422,29 @@ body { background: var(--color-fondo); }
     .form-lateral:has(> .historial-form-card) .grid-2 { grid-template-columns: 1fr; }
     .form-lateral > .historial-lista, .form-lateral > .agenda-lista, .lista-tarjeta { padding: 2px 14px; }
 }
+
+/* ── Link ARM Sistemas (sidebar footer) ───────────────────────── */
+.sidebar-arm-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 6px 10px;
+    border-radius: var(--radio-sm);
+    font-size: 12px;
+    color: var(--color-texto-suave);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+.sidebar-arm-link:hover {
+    opacity: 1;
+    color: var(--color-primario);
+}
+.sidebar-arm-link img {
+    border-radius: 4px;
+    opacity: 0.7;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease;
+}
+.sidebar-arm-link:hover img { opacity: 1; }
