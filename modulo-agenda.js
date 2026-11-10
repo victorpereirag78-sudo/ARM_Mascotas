@@ -188,14 +188,17 @@ const Agenda = (() => {
                         <div class="field-group field-ancho-completo"><label>Descripción</label><div class="input-wrap"><input type="text" id="agDescripcion"></div></div>
                         <div class="field-msg field-ancho-completo" id="agendaMensaje"></div>
                         <button type="submit" class="btn-primario btn-ancho-auto field-ancho-completo">Agregar recordatorio</button>
+                        <p class="agenda-nota field-ancho-completo">🔔 Te avisamos en el teléfono ese día, a la hora que indiques (o a las 9:00). Las vacunas y desparasitaciones, 7 días y 1 día antes.</p>
                     </form>
                 </div>
+                <div class="agenda-push" id="agendaPush"></div>
             ` : `<div class="estado-vacio"><span class="estado-vacio-icono">🐾</span><p>Registra una mascota primero para armar su agenda.</p></div>`}
 
             ${items.length ? `<div class="agenda-lista">${filas}</div>` : mascotas.length ? plantillaVacia() : ''}
             </div>
         `;
         wireEventos();
+        if (window.Push) Push.tarjeta(document.getElementById('agendaPush'));
     }
 
     function plantillaVacia() {

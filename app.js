@@ -87,11 +87,22 @@ const MENSAJES_CUENTA_BLOQUEADA = {
         sessionStorage.setItem('arm_abrir_mascota', parametros.get('mascota'));
         sessionStorage.setItem('arm_abrir_mascota_vet', '1');
     }
+    // Push de un recordatorio propio (sql/020): ?panel=agenda, o
+    // ?panel=medicamentos&m=… (abre los medicamentos de esa mascota).
+    const destinoPanel = parametros.get('panel');
+    if (destinoPanel === 'medicamentos' && parametros.get('m')) {
+        sessionStorage.setItem('arm_abrir_mascota', parametros.get('m'));
+        sessionStorage.setItem('arm_abrir_pestana', 'salud');
+        sessionStorage.setItem('arm_abrir_sub', 'medicamentos');
+    }
+    const panelPedido = { agenda: 'panel-agenda', medicamentos: 'panel-mascotas' }[destinoPanel];
     if (parametros.toString()) history.replaceState(null, '', '/app.html');
     const quiereVet = (destinoVet && destinoVet !== 'inicio') || VetApp.leerCodigo();
-    const panelInicial = (quiereVet && Auth.puedeAcceder('panel-veterinaria'))
-        ? PANELES.find((p) => p.id === (parametros.get('mascota') ? 'panel-mascotas' : 'panel-veterinaria'))
-        : (PANELES.find((p) => Auth.puedeAcceder(p.id)) || PANELES[0]);
+    const panelInicial = (panelPedido && Auth.puedeAcceder(panelPedido))
+        ? PANELES.find((p) => p.id === panelPedido)
+        : (quiereVet && Auth.puedeAcceder('panel-veterinaria'))
+            ? PANELES.find((p) => p.id === (parametros.get('mascota') ? 'panel-mascotas' : 'panel-veterinaria'))
+            : (PANELES.find((p) => Auth.puedeAcceder(p.id)) || PANELES[0]);
     irAPanel(panelInicial.id).then(() => {
         // Primer ingreso: recorrido de bienvenida sobre el inicio.
         if (panelInicial.id === 'panel-dashboard' && window.Tutorial) Tutorial.iniciarSiCorresponde();

@@ -403,82 +403,10 @@ const VetApp = (() => {
         irAPanel('panel-mascotas');
     }
 
-    // ── Web Push ─────────────────────────────────────────────────
-    function base64UrlABytes(b64) {
-        const relleno = '='.repeat((4 - (b64.length % 4)) % 4);
-        const bin = atob((b64 + relleno).replace(/-/g, '+').replace(/_/g, '/'));
-        const out = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-        return out;
-    }
-    function soportaPush() {
-        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-    }
-    function esIOSNoInstalada() {
-        const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-        return ios && !instalada;
-    }
-    async function estadoPush() {
-        if (!soportaPush()) return esIOSNoInstalada() ? 'instalar_ios' : 'no_soportado';
-        if (Notification.permission === 'denied') return 'bloqueado';
-        const reg = await navigator.serviceWorker.getRegistration();
-        if (!reg) return 'sin_sw';
-        const sub = await reg.pushManager.getSubscription();
-        return sub && Notification.permission === 'granted' ? 'activo' : 'inactivo';
-    }
-    async function activarPush() {
-        const reg = await navigator.serviceWorker.ready;
-        const permiso = await Notification.requestPermission();
-        if (permiso !== 'granted') throw new Error('No diste permiso para notificaciones.');
-        const { data, error } = await db.from('vet_push_config').select('application_server_key').eq('id', 1).maybeSingle();
-        if (error) throw error;
-        if (!data || !data.application_server_key) throw new Error('Las notificaciones se están configurando. Intenta en un minuto.');
-        const clave = base64UrlABytes(data.application_server_key);
-        let sub = await reg.pushManager.getSubscription();
-        if (sub) {
-            const actual = sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
-            if (actual && (actual.length !== clave.length || actual.some((b, i) => b !== clave[i]))) { await sub.unsubscribe(); sub = null; }
-        }
-        if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: clave });
-        const j = sub.toJSON();
-        await rpc('vet_push_suscribir', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_user_agent: navigator.userAgent.slice(0, 300) });
-    }
-    async function desactivarPush() {
-        const reg = await navigator.serviceWorker.getRegistration();
-        const sub = reg && await reg.pushManager.getSubscription();
-        if (sub) {
-            await rpc('vet_push_desuscribir', { p_endpoint: sub.endpoint }).catch(() => {});
-            await sub.unsubscribe().catch(() => {});
-        }
-    }
-    async function renderPush(el) {
-        if (!el) return;
-        const estado = await estadoPush().catch(() => 'no_soportado');
-        const textos = {
-            activo: '✅ Este teléfono recibe notificaciones de tu veterinaria.',
-            inactivo: '📲 Activa las notificaciones para enterarte al instante de vacunas, controles y novedades.',
-            bloqueado: '🔕 Bloqueaste las notificaciones en el navegador. Actívalas desde la configuración del sitio.',
-            instalar_ios: '📲 En iPhone, primero agrega ARM Mascotas a la pantalla de inicio (Compartir → Agregar a inicio).',
-            no_soportado: 'Este navegador no admite notificaciones push. Igual verás los avisos aquí.',
-            sin_sw: 'Recarga la página para activar las notificaciones.'
-        };
-        el.innerHTML = `
-            <div class="vet-push vet-push-${estado}">
-                <p>${textos[estado]}</p>
-                ${estado === 'inactivo' ? '<button class="btn-primario btn-ancho-auto btn-chico" id="vetPushActivar">Activar notificaciones</button>' : ''}
-                ${estado === 'activo' ? '<button class="btn-secundario btn-chico" id="vetPushPrueba">Enviar prueba</button> <button class="btn-secundario btn-chico" id="vetPushDesactivar">Desactivar</button>' : ''}
-            </div>`;
-        const on = (id, fn) => { const b = el.querySelector(id); if (b) b.addEventListener('click', fn); };
-        on('#vetPushActivar', async (ev) => {
-            Utils.setLoading(ev.currentTarget, true, 'Activando...');
-            try { await activarPush(); Utils.toast('Notificaciones activadas.', 'exito'); } catch (e) { Utils.toast(e.message, 'error'); }
-            renderPush(el);
-        });
-        on('#vetPushPrueba', async () => {
-            try { await rpc('vet_push_prueba'); Utils.toast('Enviada: llegará en menos de un minuto.', 'exito'); } catch (e) { Utils.toast(e.message, 'error'); }
-        });
-        on('#vetPushDesactivar', async () => { await desactivarPush(); renderPush(el); });
+    // ── Web Push: lo maneja push.js (la misma suscripción sirve para
+    // los avisos de la clínica y para los recordatorios propios). ──
+    function renderPush(el) {
+        if (window.Push) Push.tarjeta(el);
     }
 
     // ── Presupuestos: el dueño acepta, rechaza o pide cambios ────

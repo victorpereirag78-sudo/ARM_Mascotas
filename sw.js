@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v17';
+const CACHE_NAME = 'arm-mascotas-v18';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -45,6 +45,7 @@ const ARCHIVOS_SHELL = [
     '/config.js',
     '/utils.js',
     '/auth.js',
+    '/push.js',
     '/login.js',
     '/registro.js',
     '/recuperar.js',
@@ -164,8 +165,9 @@ self.addEventListener('fetch', (evento) => {
 });
 
 // ================================================================
-// Web Push de ARM Veterinaria
-// Llega cifrado desde la Edge Function vet-dispatch con
+// Web Push (avisos de ARM Veterinaria y recordatorios propios)
+// Llega cifrado desde las Edge Functions vet-dispatch o
+// mascotas-push-dispatch con
 // { title, body, url, tag }. Al tocarlo se abre (o enfoca) la app en
 // la pantalla del aviso.
 // ================================================================

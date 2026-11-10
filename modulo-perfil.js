@@ -121,7 +121,7 @@ const Perfil = (() => {
         ['Mi mascota se perdió, ¿qué hago?', 'Abre su ficha → <b>SOS y QR</b> → <b>Marcar como perdida</b> y registra dónde la viste por última vez. Su ficha pública mostrará el aviso para que quien la encuentre te contacte. Cuando aparezca, márcala como encontrada.'],
         ['¿Cómo comparto a mi mascota con mi familia?', 'En <b>Compartir</b> escribe el correo de la persona y elige si solo puede ver o también editar. Ella acepta la invitación desde su propia cuenta de ARM Mascotas.'],
         ['¿Cómo instalo la app en mi teléfono?', 'Toca <b>Instalar app</b> en el menú o abre <a href="/instalar.html">la guía de instalación</a>. Queda en tu pantalla de inicio como cualquier app, sin pasar por una tienda.'],
-        ['No me llegan las notificaciones', 'Actívalas en <b>Mi veterinaria → Avisos de tu veterinaria</b> y acepta el permiso del navegador. En iPhone, primero instala la app en la pantalla de inicio y ábrela desde ahí.'],
+        ['No me llegan las notificaciones', 'Actívalas desde el aviso del <b>Inicio</b> o en <b>Agenda</b> (botón <b>Activar notificaciones</b>) y acepta el permiso del navegador. Con <b>Enviar prueba</b> compruebas que llegan. En iPhone, primero instala la app en la pantalla de inicio y ábrela desde ahí.'],
         ['¿Cómo corrijo o elimino mis datos?', 'Tus datos y los de cada mascota los editas aquí y en cada ficha. Para lo que guarda una clínica, usa <b>Mi veterinaria → Tus datos personales</b>. Para cerrar tu cuenta, escríbenos a <a href="mailto:privacidad@armsistemas.cl">privacidad@armsistemas.cl</a> desde el correo con que te registraste.'],
         ['¿La app tiene costo?', 'No. ARM Mascotas es gratis para los dueños de mascotas.']
     ];

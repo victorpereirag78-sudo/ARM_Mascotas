@@ -17,6 +17,8 @@ const Dashboard = (() => {
         wireEventos(el);
         cargarProximos(el, mascotas);
         if (window.VetApp) VetApp.decorarDashboard(el);
+        // Sin notificaciones activadas, nada llega al teléfono: se invita a activarlas.
+        if (window.Push && mascotas.length) Push.bannerInicio(el);
         // Primer ingreso: recorrido de bienvenida (se marca como visto al cerrarlo).
         if (window.Tutorial) Tutorial.iniciarSiCorresponde();
     }
