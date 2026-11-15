@@ -103,6 +103,12 @@ const Auth = (() => {
             const { data: nuevo, error: errorAlta } = await db.rpc('fn_asegurar_mi_perfil_mascotas');
             if (errorAlta) return { ok: false, error: errorAlta.message };
             perfilFinal = nuevo;
+        } else if (perfilFinal.usa_mascotas === false) {
+            // Perfil heredado de otra app (ver sql/022) que recién ahora
+            // entra de verdad a ARM Mascotas: desde ya cuenta como usuario
+            // de la app y aparece en el panel de administración.
+            await db.from('mascotas_perfiles').update({ usa_mascotas: true }).eq('id', user.id);
+            perfilFinal.usa_mascotas = true;
         }
 
         window.appData.usuario = user;

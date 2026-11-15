@@ -39,8 +39,18 @@ const Admin = (() => {
         perfiles = data;
     }
 
+    // El proyecto de Supabase es compartido con otras apps: los perfiles con
+    // usa_mascotas = false son cuentas heredadas de esas apps que nunca
+    // entraron a ARM Mascotas (ver sql/022). Solo se ven en "Otras apps".
+    function perfilesDe(valor) {
+        if (valor === 'externos') return perfiles.filter((p) => p.usa_mascotas === false);
+        const propios = perfiles.filter((p) => p.usa_mascotas !== false);
+        return valor === 'todos' ? propios : propios.filter((p) => p.estado_cuenta === valor);
+    }
+
     function render() {
-        const visibles = filtro === 'todos' ? perfiles : perfiles.filter((p) => p.estado_cuenta === filtro);
+        const visibles = perfilesDe(filtro);
+        const hayExternos = perfilesDe('externos').length > 0;
 
         contenedorActual.innerHTML = `
             <div class="admin-tabs" id="adminTabs">
@@ -49,14 +59,16 @@ const Admin = (() => {
                 ${tabBoton('rechazado', 'Rechazadas')}
                 ${tabBoton('suspendido', 'Suspendidas')}
                 ${tabBoton('todos', 'Todas')}
+                ${hayExternos || filtro === 'externos' ? tabBoton('externos', 'Otras apps') : ''}
             </div>
+            ${filtro === 'externos' ? '<p class="admin-nota-externos">Cuentas creadas desde otras apps de ARM que nunca entraron a ARM Mascotas. Si alguna entra a la app, pasa sola a la lista normal.</p>' : ''}
             ${visibles.length ? `<div class="admin-lista">${visibles.map(filaPerfil).join('')}</div>` : plantillaEstadoVacio()}
         `;
         wireEventos();
     }
 
     function tabBoton(valor, etiqueta) {
-        const conteo = valor === 'todos' ? perfiles.length : perfiles.filter((p) => p.estado_cuenta === valor).length;
+        const conteo = perfilesDe(valor).length;
         return `<button class="admin-tab ${filtro === valor ? 'activo' : ''}" data-filtro="${valor}">${etiqueta} (${conteo})</button>`;
     }
 
@@ -86,6 +98,7 @@ const Admin = (() => {
                 <span class="badge-estado badge-${p.estado_cuenta}">${ETIQUETAS_ESTADO[p.estado_cuenta] || p.estado_cuenta}</span>
                 <div class="admin-fila-acciones">
                     ${esUnoMismo ? '<span class="admin-fila-tu">(tú)</span>' : accionesPara(p)}
+                    ${p.usa_mascotas === false ? `<button class="btn-secundario btn-marcar-propio" data-id="${p.id}">Es de ARM Mascotas</button>` : ''}
                     ${puedeConvertirVet ? `<button class="btn-secundario btn-toggle-vet" data-id="${p.id}">Convertir en veterinario</button>` : ''}
                     <button class="btn-secundario btn-enviar-reset" data-correo="${esc(p.correo)}">Enviar reset de contraseña</button>
                 </div>
@@ -140,6 +153,10 @@ const Admin = (() => {
 
         document.querySelectorAll('.btn-cambiar-estado').forEach((btn) => {
             btn.addEventListener('click', () => cambiarEstado(btn.dataset.id, btn.dataset.estado));
+        });
+
+        document.querySelectorAll('.btn-marcar-propio').forEach((btn) => {
+            btn.addEventListener('click', () => marcarPropio(btn.dataset.id));
         });
 
         document.querySelectorAll('.btn-enviar-reset').forEach((btn) => {
@@ -220,6 +237,18 @@ const Admin = (() => {
             return;
         }
         Utils.toast(`Correo de recuperación enviado a ${correo}`, 'exito');
+    }
+
+    // Rescata una cuenta mal clasificada como "de otra app".
+    async function marcarPropio(id) {
+        const { error } = await db.from('mascotas_perfiles').update({ usa_mascotas: true }).eq('id', id);
+        if (error) {
+            Utils.toast('No se pudo actualizar: ' + error.message, 'error');
+            return;
+        }
+        Utils.toast('Cuenta movida a la lista de ARM Mascotas', 'exito');
+        await cargarPerfiles();
+        render();
     }
 
     async function cambiarEstado(id, nuevoEstado) {
