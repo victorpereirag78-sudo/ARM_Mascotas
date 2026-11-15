@@ -45,6 +45,20 @@
             </div>
 
             ${seccion('💉 Vacunas', m.vacunas, (v) => `${esc(v.nombre)} · ${Utils.formatearFecha(v.fecha)}`)}
+            ${m.serie_antirrabica ? `
+                <div class="pasaporte-publico-seccion">
+                    <strong>🏷️ Serie vacuna antirrábica</strong>
+                    <p class="pasaporte-publico-serie">${esc(m.serie_antirrabica)}</p>
+                </div>
+            ` : ''}
+            ${m.stickers && m.stickers.length ? `
+                <div class="pasaporte-publico-seccion">
+                    <strong>📸 Stickers de vacunas</strong>
+                    <div class="pasaporte-publico-stickers">
+                        ${m.stickers.map((s) => `<a href="${escAttr(s.url)}" target="_blank" rel="noopener"><img src="${escAttr(s.url)}" alt="Stickers de vacunas" loading="lazy"></a>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
             ${seccion('🐛 Desparasitación', m.desparasitaciones, (d) => `${d.tipo === 'interna' ? 'Interna' : 'Externa'}${d.producto ? ' · ' + esc(d.producto) : ''} · ${Utils.formatearFecha(d.fecha)}`)}
             ${seccion('💊 Medicamentos', m.medicamentos, (med) => `${esc(med.nombre)}${med.dosis ? ' · ' + esc(med.dosis) : ''}${med.activo ? ' (activo)' : ''}`)}
             ${seccion('🚨 Alergias', m.alergias, (a) => `${esc(a.nombre)}${a.severidad ? ' · ' + esc(a.severidad) : ''}`)}
@@ -96,6 +110,10 @@
 
     function capitalizar(s) {
         return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    }
+
+    function escAttr(v) {
+        return (v || '').toString().replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function esc(v) {

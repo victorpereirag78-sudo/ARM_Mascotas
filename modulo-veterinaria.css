@@ -188,6 +188,12 @@
 .vet-cita-cuando { margin: 0; font-weight: 700; font-size: 14px; }
 .vet-cita-cuando::first-letter { text-transform: uppercase; }
 .vet-cita-lado { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+/* En teléfono las acciones bajan a una fila propia: al lado apretaban el texto y el botón tapaba la fecha. */
+@media (max-width: 640px) {
+    .vet-cita { flex-wrap: wrap; }
+    .vet-cita-lado { flex: 1 0 100%; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 12px;
+        padding-top: 8px; border-top: 1px solid var(--color-borde); }
+}
 .vet-etiqueta { margin: 14px 0 6px; font-size: 13px; font-weight: 700; }
 .vet-opciones { display: flex; flex-wrap: wrap; gap: 8px; }
 .vet-opcion { border: 1px solid var(--color-borde); border-radius: 12px; padding: 10px 14px; background: var(--color-superficie); color: var(--color-texto);

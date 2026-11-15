@@ -32,6 +32,9 @@ const Pasaporte = (() => {
     let mascota = null;
     let datos = {};
     let compartidos = [];
+    let stickers = [];
+    const MAX_STICKERS = 12;
+    const MAX_PESO_FOTO = 8 * 1024 * 1024;
     let formCompartirAbierto = false;
 
     async function init(el, m) {
@@ -43,7 +46,7 @@ const Pasaporte = (() => {
     }
 
     async function cargarTodo() {
-        const [vacunas, desparasitaciones, medicamentos, alergias, diagnosticos, cirugias, consultas, compartidosData] = await Promise.all([
+        const [vacunas, desparasitaciones, medicamentos, alergias, diagnosticos, cirugias, consultas, compartidosData, stickersData] = await Promise.all([
             consultar('mascotas_vacunas', 'fecha'),
             consultar('mascotas_desparasitaciones', 'fecha'),
             consultar('mascotas_medicamentos', 'created_at'),
@@ -51,10 +54,12 @@ const Pasaporte = (() => {
             consultar('mascotas_diagnosticos', 'fecha'),
             consultar('mascotas_cirugias', 'fecha'),
             consultar('mascotas_consultas', 'fecha'),
-            db.from('mascotas_pasaporte_compartido').select('*').eq('mascota_id', mascota.id).gt('expira_at', new Date().toISOString()).order('created_at', { ascending: false })
+            db.from('mascotas_pasaporte_compartido').select('*').eq('mascota_id', mascota.id).gt('expira_at', new Date().toISOString()).order('created_at', { ascending: false }),
+            db.from('mascotas_pasaporte_stickers').select('*').eq('mascota_id', mascota.id).order('created_at', { ascending: true })
         ]);
         datos = { vacunas, desparasitaciones, medicamentos, alergias, diagnosticos, cirugias, consultas };
         compartidos = compartidosData.data || [];
+        stickers = stickersData.data || [];
     }
 
     async function consultar(tabla, orden) {
@@ -87,6 +92,41 @@ const Pasaporte = (() => {
                     ${dato('Color', mascota.color || '—')}
                     ${dato('Microchip', mascota.microchip || 'Sin registrar')}
                     ${dato('Nacimiento', mascota.fecha_nacimiento ? Utils.formatearFecha(mascota.fecha_nacimiento) : '—')}
+                </div>
+
+                <h4 class="seccion-titulo">Vacunas: stickers y antirrábica</h4>
+                <div class="pasaporte-vacunas-extra">
+                    <div class="field-group">
+                        <label for="pasSerieAntirrabica">Serie vacuna antirrábica</label>
+                        <div class="pasaporte-serie-fila">
+                            <div class="input-wrap">
+                                <input type="text" id="pasSerieAntirrabica" maxlength="60" autocomplete="off"
+                                    placeholder="N.º de serie que trae el sticker" value="${esc(mascota.serie_antirrabica)}">
+                            </div>
+                            <button type="button" class="btn-secundario" id="btnGuardarSerie">Guardar</button>
+                        </div>
+                    </div>
+
+                    <p class="qr-descripcion">Sube la foto de los stickers de las vacunas (los autoadhesivos del carnet) para tenerlos siempre a mano.</p>
+                    ${stickers.length ? `
+                        <div class="pasaporte-stickers">
+                            ${stickers.map((s) => `
+                                <figure class="pasaporte-sticker">
+                                    <a href="${esc(s.url)}" target="_blank" rel="noopener" title="Ver en grande">
+                                        <img src="${esc(s.url)}" alt="Stickers de vacunas de ${esc(mascota.nombre)}" loading="lazy">
+                                    </a>
+                                    <figcaption>${Utils.formatearFecha((s.created_at || '').slice(0, 10))}</figcaption>
+                                    <button type="button" class="pasaporte-sticker-quitar btn-quitar-sticker" data-id="${s.id}" aria-label="Eliminar foto">✕</button>
+                                </figure>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    ${stickers.length < MAX_STICKERS ? `
+                        <label class="btn-secundario btn-ancho-auto pasaporte-subir" id="pasSubirEtiqueta">
+                            📷 Subir foto de stickers
+                            <input type="file" id="pasStickerArchivo" accept="image/*" hidden>
+                        </label>
+                    ` : `<p class="qr-descripcion">Llegaste al máximo de ${MAX_STICKERS} fotos. Elimina alguna para subir otra.</p>`}
                 </div>
 
                 <h4 class="seccion-titulo">Salud</h4>
@@ -171,6 +211,13 @@ const Pasaporte = (() => {
             render();
         });
 
+        document.getElementById('btnGuardarSerie').addEventListener('click', guardarSerie);
+        const archivo = document.getElementById('pasStickerArchivo');
+        if (archivo) archivo.addEventListener('change', subirSticker);
+        document.querySelectorAll('.btn-quitar-sticker').forEach((btn) => {
+            btn.addEventListener('click', () => quitarSticker(btn.dataset.id));
+        });
+
         const btnGenerar = document.getElementById('btnGenerarEnlace');
         if (btnGenerar) btnGenerar.addEventListener('click', generarEnlace);
 
@@ -181,6 +228,74 @@ const Pasaporte = (() => {
         document.querySelectorAll('.btn-revocar-pasaporte').forEach((btn) => {
             btn.addEventListener('click', () => revocarEnlace(btn.dataset.id));
         });
+    }
+
+    async function guardarSerie() {
+        const btn = document.getElementById('btnGuardarSerie');
+        const serie = document.getElementById('pasSerieAntirrabica').value.trim() || null;
+
+        Utils.setLoading(btn, true);
+        const { error } = await db.from('mascotas').update({ serie_antirrabica: serie }).eq('id', mascota.id);
+        Utils.setLoading(btn, false);
+        if (error) {
+            Utils.toast('No se pudo guardar la serie: ' + error.message, 'error');
+            return;
+        }
+        mascota.serie_antirrabica = serie;
+        Utils.toast(serie ? 'Serie antirrábica guardada' : 'Serie antirrábica eliminada', 'exito');
+    }
+
+    async function subirSticker(ev) {
+        const file = ev.target.files[0];
+        ev.target.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            Utils.toast('Elige una imagen (foto de los stickers).', 'error');
+            return;
+        }
+        if (file.size > MAX_PESO_FOTO) {
+            Utils.toast('La foto pesa más de 8 MB. Toma otra con menos resolución.', 'error');
+            return;
+        }
+
+        const etiqueta = document.getElementById('pasSubirEtiqueta');
+        etiqueta.classList.add('btn-cargando');
+        const res = await Utils.subirArchivo(BUCKET_FOTOS_MASCOTAS, `${mascota.id}/stickers`, file);
+        if (!res.ok) {
+            etiqueta.classList.remove('btn-cargando');
+            Utils.toast('No se pudo subir la foto: ' + res.error, 'error');
+            return;
+        }
+
+        const { error } = await db.from('mascotas_pasaporte_stickers')
+            .insert({ mascota_id: mascota.id, url: res.url, ruta: res.ruta, subido_por: window.appData.usuario.id });
+        if (error) {
+            // La fila no quedó: se retira el archivo para no dejarlo huérfano.
+            await db.storage.from(BUCKET_FOTOS_MASCOTAS).remove([res.ruta]);
+            etiqueta.classList.remove('btn-cargando');
+            Utils.toast('No se pudo guardar la foto: ' + error.message, 'error');
+            return;
+        }
+
+        Utils.toast('Foto de stickers guardada', 'exito');
+        await cargarTodo();
+        render();
+    }
+
+    async function quitarSticker(id) {
+        const sticker = stickers.find((s) => s.id === id);
+        if (!sticker || !confirm('¿Eliminar esta foto de stickers?')) return;
+
+        const { error } = await db.from('mascotas_pasaporte_stickers').delete().eq('id', id);
+        if (error) {
+            Utils.toast('No se pudo eliminar: ' + error.message, 'error');
+            return;
+        }
+        if (sticker.ruta) await db.storage.from(BUCKET_FOTOS_MASCOTAS).remove([sticker.ruta]);
+
+        Utils.toast('Foto eliminada', 'exito');
+        await cargarTodo();
+        render();
     }
 
     async function generarEnlace() {
