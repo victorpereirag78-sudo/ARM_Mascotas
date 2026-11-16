@@ -87,6 +87,8 @@ const Pasaporte = (() => {
                     </div>
                 </div>
 
+                <div id="pasaporteInternacional"></div>
+
                 <div class="pasaporte-grid">
                     ${dato('Peso', mascota.peso_actual ? mascota.peso_actual + ' kg' : '—')}
                     ${dato('Color', mascota.color || '—')}
@@ -189,6 +191,8 @@ const Pasaporte = (() => {
             </div>
         `;
         wireEventos();
+        // Pasaporte internacional (documento oficial publicado por la clínica): solo aparece si hay uno.
+        if (window.PasaporteInternacional) PasaporteInternacional.montar(document.getElementById('pasaporteInternacional'), mascota);
     }
 
     function dato(etiqueta, valor) {

@@ -45,3 +45,17 @@
 .pasaporte-compartidos-lista { margin-bottom: 16px; }
 
 #pasaporteResultado:not(:empty) { margin-top: 16px; }
+
+/* Pasaporte internacional (documento oficial publicado por la clínica) */
+.pasint { margin-bottom: 22px; padding: 14px; border: 1px solid var(--color-borde); border-radius: 14px; background: var(--color-superficie); }
+.pasint .seccion-titulo { margin-top: 0; }
+.pasint-aviso { margin: 0 0 12px; font-size: 13px; color: var(--color-texto-suave); }
+.pasint-item { padding-top: 12px; border-top: 1px solid var(--color-borde); }
+.pasint-item:first-of-type { border-top: 0; padding-top: 0; }
+.pasint-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.pasint-chip { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(34, 197, 94, .15); color: #15803d; }
+.pasint-obs { margin: 0 0 10px; font-size: 14px; }
+.pasint-sub { margin: 0 0 10px; font-size: 12px; color: var(--color-texto-suave); }
+.pasint-paginas { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pasint-paginas li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pasint-pagina { flex: 1; min-width: 120px; font-weight: 600; }

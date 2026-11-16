@@ -122,7 +122,10 @@ const VetApp = (() => {
                 }
                 if (li.dataset.presupuesto) Presupuestos.mostrar(el, li.dataset.presupuesto);
                 else if (li.dataset.seccion && window.VetExtra && el.querySelector(li.dataset.seccion)) VetExtra.mostrar(el, li.dataset.seccion);
-                else if (li.dataset.mascota) abrirMascota(li.dataset.mascota);
+                else if (li.dataset.mascota) {
+                    if (li.dataset.pestana) sessionStorage.setItem('arm_abrir_pestana', li.dataset.pestana);
+                    abrirMascota(li.dataset.mascota);
+                }
             });
         });
         Presupuestos.conectar(el, presupuestos, () => init(el));
@@ -150,7 +153,7 @@ const VetApp = (() => {
     function itemNotificacion(n) {
         return `
             <li class="vet-notif ${n.leida ? '' : 'no-leida'}" data-id="${h(n.id)}" ${n.accion && n.accion.tipo === 'presupuesto' ? `data-presupuesto="${h(n.accion.id)}"`
-                : n.mascota_app_id ? `data-mascota="${h(n.mascota_app_id)}"` : ''} ${n.accion && SECCION_AVISO[n.accion.tipo] ? `data-seccion="${SECCION_AVISO[n.accion.tipo]}"` : ''}>
+                : n.mascota_app_id ? `data-mascota="${h(n.mascota_app_id)}"` : ''} ${n.accion && SECCION_AVISO[n.accion.tipo] ? `data-seccion="${SECCION_AVISO[n.accion.tipo]}"` : ''} ${n.accion && n.accion.tipo === 'pasaporte' ? 'data-pestana="pasaporte"' : ''}>
                 <div class="vet-notif-cuerpo">
                     <p class="vet-notif-titulo">${h(n.titulo)}</p>
                     ${n.mensaje ? `<p class="vet-notif-mensaje">${h(n.mensaje)}</p>` : ''}
