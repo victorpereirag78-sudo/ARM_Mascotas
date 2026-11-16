@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v20';
+const CACHE_NAME = 'arm-mascotas-v21';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -44,6 +44,7 @@ const ARCHIVOS_SHELL = [
     '/pasaporte-publico.css',
     '/config.js',
     '/utils.js',
+    '/geo.js',
     '/auth.js',
     '/push.js',
     '/login.js',

@@ -71,16 +71,16 @@
                         <div class="input-wrap"><input type="text" id="direccion"></div>
                     </div>
                     <div class="field-group">
-                        <label for="ciudad">Ciudad</label>
+                        <label for="ciudad" id="etqCiudad">Ciudad</label>
                         <div class="input-wrap"><input type="text" id="ciudad"></div>
                     </div>
                     <div class="field-group">
-                        <label for="region">Región</label>
+                        <label for="region" id="etqRegion">Región</label>
                         <div class="input-wrap"><input type="text" id="region"></div>
                     </div>
                     <div class="field-group">
                         <label for="pais">País</label>
-                        <div class="input-wrap"><input type="text" id="pais" value="Chile"></div>
+                        <div class="input-wrap"><select id="pais"><option value="Chile">Chile</option></select></div>
                     </div>
                 </div>
 
@@ -121,6 +121,7 @@
     <script src="/config.js"></script>
     <script src="/config.local.js" onerror="this.remove()"></script>
     <script src="/utils.js"></script>
+    <script src="/geo.js"></script>
     <script src="/auth.js"></script>
     <script src="/registro.js"></script>
 </body>

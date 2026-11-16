@@ -14,6 +14,12 @@
         if (res.ok) window.location.href = '/app.html';
     });
 
+    // País (lista), región y ciudad con sugerencias del catálogo; se puede escribir a mano.
+    Geo.enlazar({
+        selPais: document.getElementById('pais'), inpRegion: document.getElementById('region'), inpCiudad: document.getElementById('ciudad'),
+        etqRegion: document.getElementById('etqRegion'), etqCiudad: document.getElementById('etqCiudad'), valorPais: 'Chile'
+    });
+
     form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
         limpiarErrores();

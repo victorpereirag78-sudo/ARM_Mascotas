@@ -12,6 +12,10 @@ const Perfil = (() => {
 
         document.getElementById('inputFotoPerfil').addEventListener('change', subirFoto);
         document.getElementById('formPerfil').addEventListener('submit', guardar);
+        if (window.Geo) Geo.enlazar({
+            selPais: document.getElementById('pPais'), inpRegion: document.getElementById('pRegion'), inpCiudad: document.getElementById('pCiudad'),
+            etqRegion: document.getElementById('pEtqRegion'), etqCiudad: document.getElementById('pEtqCiudad'), valorPais: p.pais || ''
+        });
         const btnTutorial = document.getElementById('btnVerTutorial');
         if (btnTutorial) btnTutorial.addEventListener('click', async () => {
             await irAPanel('panel-dashboard');
@@ -73,16 +77,16 @@ const Perfil = (() => {
                             <div class="input-wrap"><input type="text" id="pDireccion" value="${esc(p.direccion)}"></div>
                         </div>
                         <div class="field-group">
-                            <label>Ciudad</label>
+                            <label id="pEtqCiudad">Ciudad</label>
                             <div class="input-wrap"><input type="text" id="pCiudad" value="${esc(p.ciudad)}"></div>
                         </div>
                         <div class="field-group">
-                            <label>Región</label>
+                            <label id="pEtqRegion">Región</label>
                             <div class="input-wrap"><input type="text" id="pRegion" value="${esc(p.region)}"></div>
                         </div>
                         <div class="field-group">
                             <label>País</label>
-                            <div class="input-wrap"><input type="text" id="pPais" value="${esc(p.pais)}"></div>
+                            <div class="input-wrap"><select id="pPais"><option value="${esc(p.pais || '')}">${esc(p.pais || 'Selecciona tu país')}</option></select></div>
                         </div>
                     </div>
 
