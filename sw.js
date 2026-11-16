@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v22';
+const CACHE_NAME = 'arm-mascotas-v23';
 
 const ARCHIVOS_SHELL = [
     '/index.html',
@@ -40,6 +40,7 @@ const ARCHIVOS_SHELL = [
     '/modulo-pasaporte.css',
     '/modulo-veterinaria.css',
     '/modulo-catalogo.css',
+    '/modulo-servicios.css',
     '/qr-publico.css',
     '/pasaporte-publico.css',
     '/config.js',
@@ -69,6 +70,7 @@ const ARCHIVOS_SHELL = [
     '/modulo-veterinaria.js',
     '/modulo-reservas.js',
     '/modulo-catalogo.js',
+    '/modulo-servicios.js',
     '/modulo-tutorial.js',
     '/modulo-tutorial.css',
     '/privacidad.html',

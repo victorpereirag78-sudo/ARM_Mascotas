@@ -20,6 +20,7 @@ const PANELES = [
     { id: 'panel-dashboard', icono: ICONOS_NAV.home, etiqueta: 'Inicio', modulo: () => window.Dashboard },
     { id: 'panel-mascotas', icono: ICONOS_NAV.paw, etiqueta: 'Mis mascotas', corta: 'Mascotas', modulo: () => window.Mascota },
     { id: 'panel-veterinaria', icono: ICONOS_NAV.clinica, etiqueta: 'Mi veterinaria', corta: 'Veterinaria', modulo: () => window.VetApp },
+    { id: 'panel-servicios', icono: ICONOS_NAV.paw, etiqueta: 'Servicios para mi mascota', corta: 'Servicios', modulo: () => window.Servicios },
     { id: 'panel-agenda', icono: ICONOS_NAV.agenda, etiqueta: 'Agenda', modulo: () => window.Agenda },
     { id: 'panel-perfil', icono: ICONOS_NAV.perfil, etiqueta: 'Mi perfil', corta: 'Perfil', modulo: () => window.Perfil },
     { id: 'panel-compartir', icono: ICONOS_NAV.compartir, etiqueta: 'Compartir', modulo: () => window.Compartir },

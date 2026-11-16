@@ -28,6 +28,7 @@ const ROL_MODULOS = {
         'panel-dashboard',
         'panel-mascotas',
         'panel-veterinaria',
+        'panel-servicios',
         'panel-agenda',
         'panel-perfil',
         'panel-compartir'
