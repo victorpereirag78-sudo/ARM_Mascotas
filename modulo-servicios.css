@@ -43,3 +43,7 @@
 .srv-eval { margin-top: 10px; display: grid; gap: 8px; }
 .srv-estrellas { display: flex; gap: 2px; }
 .srv-estrellas button { border: 0; background: transparent; font-size: 26px; line-height: 1; color: #f59e0b; cursor: pointer; padding: 2px 4px; }
+
+.srv-negocio { padding: 14px; display: grid; gap: 4px; list-style: none; }
+.srv-cat { margin: 10px 0 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--color-texto-suave); }
+.srv-acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }

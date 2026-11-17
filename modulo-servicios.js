@@ -9,15 +9,19 @@
 //   · srv_app_horas_libres(p_servicio, p_fecha)
 //   · srv_app_reservar(p_d)                  solicitud con consentimiento y ficha mínima
 //   · srv_app_mis_reservas / srv_app_cancelar_reserva / srv_app_evaluar
-// Las veterinarias y peluquerías siguen en "Mi veterinaria".
+// Peluquerías: las que activan "Mostrarme en Mi Mascota" se listan con vet_app_peluquerias(p_f)
+// (servicios y precios; reservan por su enlace en línea o por WhatsApp). Las veterinarias siguen en "Mi veterinaria".
 // Expone window.Servicios.
 // ================================================================
 
 const Servicios = (() => {
     const { h, rpc } = VetApp;
 
-    const TIPOS = { '': 'Todos', paseador: 'Paseadores', adiestrador: 'Adiestradores', crematorio: 'Crematorios' };
-    const ICONO = { paseador: '🦮', adiestrador: '🎓', crematorio: '🕊️' };
+    const TIPOS = { '': 'Todos', paseador: 'Paseadores', adiestrador: 'Adiestradores', crematorio: 'Crematorios', peluqueria: 'Peluquerías' };
+    const ICONO = { paseador: '🦮', adiestrador: '🎓', crematorio: '🕊️', peluqueria: '✂️' };
+    const CATEGORIA_PELU = { peluqueria_estetica: 'Peluquería y estética', paseo: 'Paseos', adiestramiento: 'Adiestramiento' };
+    // Dirección pública del panel (mismo valor que vet_sis_url_publica en la base): reservas en línea de cada negocio.
+    const PANEL_PUBLICO = 'https://vet.armsistemas.cl';
     const ETIQUETA_TIPO = { paseador: 'Paseador/a', adiestrador: 'Adiestrador/a', crematorio: 'Crematorio' };
     const MODALIDAD = { domicilio: 'A domicilio', local: 'En el local', ambas: 'Domicilio y local' };
     const FORMATO = { individual: 'Individual', grupal: 'Grupal', personalizado: 'Personalizado', recurrente: 'Recurrente' };
@@ -77,7 +81,7 @@ const Servicios = (() => {
                     <div class="input-wrap"><input type="number" id="srvPrecio" placeholder="Precio máximo" min="0" value="${h(filtros.precio_max)}"></div>
                     <button class="btn-primario btn-ancho-auto" id="srvBuscar">Buscar</button>
                 </div>
-                <p class="vet-nota">¿Buscas una veterinaria o peluquería? Están en <a href="#" id="srvIrVet">Mi veterinaria</a>.</p>
+                <p class="vet-nota">¿Buscas tu veterinaria? Está en <a href="#" id="srvIrVet">Mi veterinaria</a>.</p>
             </section>
             <div id="srvResultados"><div class="estado-vacio"><p>Buscando…</p></div></div>`;
         cuerpo.querySelectorAll('[data-tipo]').forEach((b) => b.addEventListener('click', () => { leerFiltros(); filtros.tipo = b.dataset.tipo; pintarBusqueda(cuerpo); }));
@@ -94,6 +98,7 @@ const Servicios = (() => {
     async function cargarResultados(cuerpo) {
         const cont = cuerpo.querySelector('#srvResultados');
         cont.innerHTML = '<div class="estado-vacio"><p>Buscando…</p></div>';
+        if (filtros.tipo === 'peluqueria') { await cargarPeluquerias(cont); return; }
         let lista;
         try {
             lista = await rpc('srv_app_buscar', { p_f: {
@@ -117,6 +122,37 @@ const Servicios = (() => {
             const ruta = el.dataset.foto; if (!ruta) return;
             const url = await urlFoto(ruta); if (url) el.innerHTML = `<img src="${h(url)}" alt="" loading="lazy">`;
         });
+    }
+
+    // ── Peluquerías (vitrina) ────────────────────────────────────
+    // "$8.000" o "desde $8.000" cuando el precio varía por tamaño de la mascota.
+    const precioPelu = (s, moneda) => (s.precio_max ? `desde ${dinero(s.precio, moneda)}` : dinero(s.precio, moneda));
+
+    async function cargarPeluquerias(cont) {
+        let lista;
+        try {
+            lista = await rpc('vet_app_peluquerias', { p_f: { ciudad: filtros.ciudad || null, texto: filtros.texto || null } });
+        } catch (e) { cont.innerHTML = `<p class="field-msg msg-error">${h(e.message)}</p>`; return; }
+        if (!lista.length) {
+            cont.innerHTML = '<div class="card estado-vacio"><p>Aún no hay peluquerías que coincidan. Prueba con otra comuna o quita algún filtro.</p></div>';
+            return;
+        }
+        cont.innerHTML = `<ul class="srv-lista">${lista.map((n) => {
+            const wa = String(n.whatsapp || n.telefono || '').replace(/\D/g, '');
+            const porCategoria = {};
+            n.servicios.forEach((s) => { (porCategoria[s.categoria] = porCategoria[s.categoria] || []).push(s); });
+            return `<li class="srv-negocio card">
+                <p class="srv-nombre">✂️ ${h(n.nombre)}</p>
+                <p class="vet-nota">${h([n.direccion || n.comuna, n.region].filter(Boolean).join(' · '))}</p>
+                ${n.descripcion ? `<p class="vet-texto">${h(n.descripcion)}</p>` : ''}
+                ${Object.entries(porCategoria).map(([cat, ss]) => `
+                    <p class="srv-cat">${h(CATEGORIA_PELU[cat] || cat)}</p>
+                    <ul class="srv-tarifas">${ss.map((s) => `<li><span>${h(s.nombre)}${s.duracion_min ? ` · ${s.duracion_min} min` : ''}${s.modalidad === 'domicilio' ? ' · a domicilio' : ''}</span><span>${precioPelu(s, n.moneda)}</span></li>`).join('')}</ul>`).join('')}
+                <div class="srv-acciones">
+                    ${n.reserva_slug ? `<a class="btn-primario btn-chico" target="_blank" rel="noopener" href="${h(PANEL_PUBLICO)}/reservar/${encodeURIComponent(n.reserva_slug)}">Reservar en línea</a>` : ''}
+                    ${wa ? `<a class="btn-secundario btn-chico" target="_blank" rel="noopener" href="https://wa.me/${wa.length === 9 ? '56' + wa : wa}">💬 WhatsApp</a>` : ''}
+                </div></li>`;
+        }).join('')}</ul>`;
     }
 
     // ── Ficha ────────────────────────────────────────────────────
