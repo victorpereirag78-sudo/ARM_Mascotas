@@ -96,7 +96,7 @@ const MENSAJES_CUENTA_BLOQUEADA = {
         sessionStorage.setItem('arm_abrir_pestana', 'salud');
         sessionStorage.setItem('arm_abrir_sub', 'medicamentos');
     }
-    const panelPedido = { agenda: 'panel-agenda', medicamentos: 'panel-mascotas' }[destinoPanel];
+    const panelPedido = { agenda: 'panel-agenda', medicamentos: 'panel-mascotas', servicios: 'panel-servicios' }[destinoPanel];
     if (parametros.toString()) history.replaceState(null, '', '/app.html');
     const quiereVet = (destinoVet && destinoVet !== 'inicio') || VetApp.leerCodigo();
     const panelInicial = (panelPedido && Auth.puedeAcceder(panelPedido))

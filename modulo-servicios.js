@@ -24,7 +24,7 @@ const Servicios = (() => {
     const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const ESTADOS = {
         pendiente: ['Esperando respuesta', 'vet-chip-aviso'], confirmada: ['Confirmada', 'vet-chip-ok'], rechazada: ['Rechazada', ''],
-        cancelada: ['Cancelada', ''], finalizada: ['Realizada', 'vet-chip-ok']
+        cancelada: ['Cancelada', ''], finalizada: ['Realizada', 'vet-chip-ok'], vencida: ['Sin respuesta', '']
     };
 
     let contenedor = null;
@@ -107,7 +107,7 @@ const Servicios = (() => {
             <li><button class="srv-tarjeta" data-id="${h(p.id)}">
                 <span class="srv-foto" data-foto="${h(p.foto || '')}">${ICONO[p.tipo] || '🐾'}</span>
                 <span class="srv-info">
-                    <span class="srv-nombre">${h(p.nombre)}</span>
+                    <span class="srv-nombre">${h(p.nombre)}${p.destacado ? ' ' + chip('⭐ Destacado', 'vet-chip-aviso') : ''}</span>
                     <span class="vet-nota">${h(ETIQUETA_TIPO[p.tipo])} · ${h([p.ciudad, p.region].filter(Boolean).join(', '))}</span>
                     <span class="srv-resumen">${h(p.descripcion || '')}</span>
                     <span class="srv-pie">${p.rating ? `⭐ ${p.rating} (${p.evaluaciones})` : 'Sin evaluaciones'}${p.desde != null ? ` · desde ${dinero(p.desde, p.moneda)}` : ''}</span>
@@ -167,13 +167,16 @@ const Servicios = (() => {
     }
 
     // ── Reservar ─────────────────────────────────────────────────
-    function abrirReserva(p, s) {
+    async function abrirReserva(p, s) {
         const cuerpo = contenedor.querySelector('#srvCuerpo');
         const aptas = mascotas;
         if (!aptas.length) {
             cuerpo.insertAdjacentHTML('afterbegin', '<p class="field-msg msg-error">Primero registra una mascota en "Mis mascotas".</p>');
             return;
         }
+        // Aviso de privacidad vigente (D-L3), si ARM ya publicó uno.
+        let legal = null;
+        try { legal = await rpc('srv_legal_vigente', { p_codigo: 'privacidad_servicios' }); } catch (e) { legal = null; }
         const hoy = new Date(); const min = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         const max = new Date(hoy.getTime() + 60 * 864e5 - hoy.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         cuerpo.innerHTML = `
@@ -188,6 +191,7 @@ const Servicios = (() => {
                     <label id="rDirWrap" ${s.modalidad === 'local' ? 'hidden' : ''}>Dirección donde se realizará<div class="input-wrap"><input type="text" id="rDir" maxlength="250" placeholder="Calle, número, comuna"></div></label>
                     <label>Notas para el profesional (opcional)<div class="input-wrap"><textarea id="rNotas" rows="2" maxlength="500" placeholder="Carácter de tu mascota, indicaciones…"></textarea></div></label>
                     <label class="srv-consent"><input type="checkbox" id="rConsent"> Acepto que se comparta mi nombre y teléfono, y los datos básicos de mi mascota (nombre, especie, raza y peso), con ${h(p.nombre)} para coordinar este servicio. No se comparte su ficha médica.</label>
+                    ${legal ? `<details class="srv-privacidad"><summary>${h(legal.titulo)}</summary><p class="vet-nota" style="white-space:pre-line">${h(legal.contenido)}</p></details>` : ''}
                     <button class="btn-primario" id="rEnviar" disabled>Solicitar reserva</button>
                     <p class="field-msg" id="rMsg"></p>
                 </div>
@@ -225,14 +229,22 @@ const Servicios = (() => {
         let lista;
         try { lista = await rpc('srv_app_mis_reservas'); } catch (e) { cuerpo.innerHTML = `<p class="field-msg msg-error">${h(e.message)}</p>`; return; }
         if (!lista.length) { cuerpo.innerHTML = '<div class="card estado-vacio"><p>Aún no reservas servicios. Busca un profesional y solicita tu primera reserva.</p></div>'; return; }
-        cuerpo.innerHTML = `<ul class="vet-pedidos">${lista.map((r) => {
+        // Novedades: reservas cuyo estado cambió desde la última vez que se miraron (el aviso push puede no haber llegado).
+        let vistos = {};
+        try { vistos = JSON.parse(localStorage.getItem('arm_srv_vistos') || '{}') || {}; } catch (e) { vistos = {}; }
+        const hayVistos = Object.keys(vistos).length > 0;
+        const cambio = (r) => hayVistos && vistos[r.id] !== r.estado && r.estado !== 'pendiente';
+        const novedades = lista.filter(cambio).length;
+        try { localStorage.setItem('arm_srv_vistos', JSON.stringify(Object.fromEntries(lista.map((r) => [r.id, r.estado])))); } catch (e) { /* sin almacenamiento */ }
+        cuerpo.innerHTML = `${novedades ? `<p class="field-msg">🔔 ${novedades === 1 ? 'Una de tus reservas tiene novedades' : `${novedades} de tus reservas tienen novedades`}.</p>` : ''}<ul class="vet-pedidos">${lista.map((r) => {
             const e = ESTADOS[r.estado] || [r.estado, ''];
-            return `<li class="vet-pedido ${['cancelada', 'rechazada'].includes(r.estado) ? 'cerrado' : ''}" data-id="${h(r.id)}">
-                <div class="vet-pedido-cab"><div><p class="vet-pedido-titulo">${ICONO[r.tipo] || '🐾'} ${h(r.servicio)} · ${h(r.profesional)}</p>
+            return `<li class="vet-pedido ${['cancelada', 'rechazada', 'vencida'].includes(r.estado) ? 'cerrado' : ''}" data-id="${h(r.id)}">
+                <div class="vet-pedido-cab"><div><p class="vet-pedido-titulo">${ICONO[r.tipo] || '🐾'} ${h(r.servicio)} · ${h(r.profesional)}${cambio(r) ? ' ' + chip('Novedad', 'vet-chip-aviso') : ''}</p>
                     <p class="vet-nota">${h(r.mascota)} · ${h(cuando(r.inicio))}${r.precio != null ? ` · ${dinero(r.precio, r.moneda)}` : ''}</p></div>${chip(e[0], e[1])}</div>
                 ${r.direccion ? `<p class="vet-nota">📍 ${h(r.direccion)}</p>` : ''}
                 ${r.telefono_profesional ? `<p class="vet-texto">📞 <a href="tel:${h(r.telefono_profesional)}">${h(r.telefono_profesional)}</a></p>` : ''}
-                ${r.motivo ? `<p class="vet-nota">${r.cancelado_por === 'profesional' ? 'El profesional canceló' : r.cancelado_por === 'tutor' ? 'Cancelaste' : 'Motivo'}: ${h(r.motivo)}</p>` : ''}
+                ${r.estado === 'vencida' ? '<p class="vet-nota">El profesional no respondió a tiempo y la hora quedó libre. Puedes elegir a otro profesional.</p>'
+                    : r.motivo ? `<p class="vet-nota">${r.cancelado_por === 'profesional' ? 'El profesional canceló' : r.cancelado_por === 'tutor' ? 'Cancelaste' : 'Motivo'}: ${h(r.motivo)}</p>` : ''}
                 ${r.calificacion ? `<p class="vet-nota">Tu evaluación: ${'⭐'.repeat(r.calificacion)}</p>` : ''}
                 ${r.puede_evaluar ? `<div class="srv-eval"><div class="srv-estrellas">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-n="${n}" aria-label="${n} estrellas">☆</button>`).join('')}</div>
                     <div class="input-wrap"><textarea rows="2" maxlength="600" placeholder="Cuéntanos cómo te fue (opcional)"></textarea></div>
