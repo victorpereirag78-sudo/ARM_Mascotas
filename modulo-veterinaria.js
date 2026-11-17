@@ -251,6 +251,9 @@ const VetApp = (() => {
                             </li>`).join('') || '<li>Aún no hay mascotas registradas.</li>'}
                     </ul>
                     ${propias.length ? '<p class="vet-nota">Si alguna ya está en tu app, elígela para no duplicarla.</p>' : '<p class="vet-nota">Las agregaremos a tu app con los datos de la clínica.</p>'}
+                    ${propias.length ? `<label class="vet-enviar-historial"><input type="checkbox" id="vetEnviarHistorial">
+                        <span>Enviar a <b>${h(vista.clinica.nombre)}</b> el historial que ya tengo en la app de las mascotas que elegí arriba (vacunas, desparasitaciones, alergias y medicamentos).
+                        La clínica lo revisa antes de agregarlo. Es opcional y también puedes hacerlo después.</span></label>` : ''}
                     <div class="vet-preview-acciones">
                         <button class="btn-secundario" id="vetVolver">Volver</button>
                         <button class="btn-primario btn-ancho-auto" id="vetAceptar">Conectar con ${h(vista.clinica.nombre)}</button>
@@ -265,9 +268,19 @@ const VetApp = (() => {
                     .map((s) => ({ paciente_id: s.dataset.paciente, mascota_app_id: s.value || null }));
                 Utils.setLoading(btn, true, 'Conectando...');
                 try {
+                    const enviar = !!(el.querySelector('#vetEnviarHistorial') || {}).checked;
                     const res = await rpc('vet_app_aceptar_invitacion', { p_clave: codigo, p_asignaciones: asignaciones });
                     olvidarCodigo();
                     Utils.toast(`¡Listo! Te conectaste con ${res.clinica}.`, 'exito');
+                    if (enviar) {
+                        // Solo las mascotas que ya eran del tutor (las demás se acaban de crear con los datos de la clínica).
+                        const elegidas = new Set(asignaciones.map((a) => a.mascota_app_id).filter(Boolean));
+                        let enviadas = 0;
+                        for (const m of (res.mascotas || []).filter((x) => x.mascota_app_id && elegidas.has(x.mascota_app_id))) {
+                            try { await rpc('vet_app_enviar_historial', { p_clinica: res.clinica_id, p_mascota_app: m.mascota_app_id }); enviadas++; } catch (_e) { /* sin datos que enviar */ }
+                        }
+                        if (enviadas) Utils.toast(`Enviamos tu historial a ${res.clinica}. Lo revisarán pronto.`, 'exito');
+                    }
                     if (opciones.alTerminar) await opciones.alTerminar(res);
                 } catch (e) {
                     Utils.setLoading(btn, false);
@@ -572,12 +585,14 @@ const CarpetaVet = (() => {
         pestana = PESTANAS.some(([k]) => k === pestanaInicial) ? pestanaInicial : 'resumen';
         el.innerHTML = '<p class="vet-vacio">Cargando la carpeta médica...</p>';
         try {
-            const [historial, planes] = await Promise.all([
+            const [historial, planes, enviados] = await Promise.all([
                 rpc('vet_app_historial', { p_mascota_app: mascota.id }),
-                rpc('vet_app_planes', { p_mascota_app: mascota.id }).catch(() => [])
+                rpc('vet_app_planes', { p_mascota_app: mascota.id }).catch(() => []),
+                rpc('vet_app_historial_enviado', { p_mascota_app: mascota.id }).catch(() => [])
             ]);
             datos = historial;
             datos.planes = planes || [];
+            datos.enviados = enviados || [];
         } catch (_e) {
             el.innerHTML = `
                 <p class="vet-vacio">Cuando tu veterinaria use <b>ARM Veterinaria</b>, aquí verás automáticamente las vacunas, consultas,
@@ -612,6 +627,43 @@ const CarpetaVet = (() => {
         raiz.querySelectorAll('.vet-tab').forEach((b) => b.addEventListener('click', () => { pestana = b.dataset.tab; render(); }));
         raiz.querySelectorAll('[data-doc]').forEach((b) => b.addEventListener('click', () => abrirDocumento(b.dataset.doc)));
         raiz.querySelectorAll('[data-receta]').forEach((b) => b.addEventListener('click', () => imprimirReceta(b.dataset.receta)));
+        raiz.querySelectorAll('[data-enviar-historial]').forEach((b) => b.addEventListener('click', () => enviarHistorial(b)));
+    }
+
+    // Llevar a una veterinaria lo que el tutor anotó en la app (vacunas, desparasitaciones, alergias, medicamentos).
+    // Es decisión del tutor: la clínica lo recibe como "antecedentes aportados" y lo revisa antes de incorporarlo.
+    const ESTADO_ENVIO = { pendiente: 'enviado, la clínica lo está revisando', incorporado: 'incorporado a la ficha de la clínica', descartado: 'la clínica no lo incorporó' };
+    function tarjetaEnviarHistorial() {
+        const clinicas = datos.clinicas || [];
+        if (!clinicas.length) return '';
+        const filas = clinicas.map((c) => {
+            const envio = (datos.enviados || []).find((e) => e.clinica_id === c.clinica_id);
+            return `<li class="vet-proximo"><span><b>${h(c.clinica)}</b>${envio ? `<br><small>Último envío ${fecha(envio.enviado_en)} · ${h(ESTADO_ENVIO[envio.estado] || envio.estado)}</small>` : ''}</span>
+                <button class="btn-secundario btn-chico" data-enviar-historial="${h(c.clinica_id)}">${envio ? 'Enviar de nuevo' : 'Enviar historial'}</button></li>`;
+        }).join('');
+        return `
+            <div class="vet-bloque" style="margin-top:12px">
+                <h4>📤 Llevar mi historial a mi veterinaria</h4>
+                <p class="vet-nota" style="margin:0 0 8px">¿Cambiaste de veterinaria? Envíale las vacunas, desparasitaciones, alergias y medicamentos que anotaste de ${h(datos.mascota.nombre)} en esta app.
+                    Solo se envía cuando tú lo pides; la clínica lo revisa antes de agregarlo a su ficha.</p>
+                <ul class="vet-lista">${filas}</ul>
+            </div>`;
+    }
+
+    async function enviarHistorial(btn) {
+        const original = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Enviando...';
+        try {
+            const r = await rpc('vet_app_enviar_historial', { p_clinica: btn.dataset.enviarHistorial, p_mascota_app: datos.mascota.id });
+            const partes = [['vacunas', 'vacunas'], ['desparasitaciones', 'desparasitaciones'], ['alergias', 'alergias'], ['medicamentos', 'medicamentos']]
+                .filter(([k]) => r[k] > 0).map(([k, t]) => `${r[k]} ${t}`);
+            Utils.toast(`Enviado${partes.length ? `: ${partes.join(', ')}` : ''}. La clínica lo revisará.`, 'exito');
+            datos.enviados = await rpc('vet_app_historial_enviado', { p_mascota_app: datos.mascota.id }).catch(() => datos.enviados || []);
+            render();
+        } catch (e) {
+            btn.disabled = false; btn.textContent = original;
+            Utils.toast(e.message, 'error');
+        }
     }
 
     const etiquetaClinica = (c) => (datos.clinicas.length > 1 ? `<span class="vet-chip">${h(c)}</span>` : '');
@@ -656,7 +708,8 @@ const CarpetaVet = (() => {
                             ${datos.consultas.length ? `<p><b>${h(datos.consultas[0].motivo || 'Consulta')}</b> · ${fecha(datos.consultas[0].fecha)}${datos.consultas[0].diagnostico ? `<br>${h(datos.consultas[0].diagnostico)}` : ''}</p>` : '<p class="vet-vacio">Sin atenciones registradas.</p>'}
                         </div>
                     </div>
-                    ${emergencia()}`;
+                    ${emergencia()}
+                    ${tarjetaEnviarHistorial()}`;
             }
             case 'vacunas':
                 return lista(datos.vacunas, (v) => item(`💉 ${h(v.nombre)}`, fecha(v.fecha),

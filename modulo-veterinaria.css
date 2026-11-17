@@ -223,3 +223,7 @@
     .vet-nps { grid-template-columns: repeat(6, 1fr); }
     .vet-consent-campos { grid-template-columns: 1fr; }
 }
+
+/* Casilla opcional para enviar el historial de la app a la veterinaria nueva */
+.vet-enviar-historial { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 4px; padding: 10px 12px; border: 1px solid rgba(127,127,127,.3); border-radius: 12px; font-size: 13px; line-height: 1.4; cursor: pointer; }
+.vet-enviar-historial input { margin-top: 2px; flex: none; width: 18px; height: 18px; }
