@@ -12,7 +12,7 @@
 // ARMUniversal, sin necesidad de un bundler).
 // ================================================================
 
-const CACHE_NAME = 'arm-mascotas-v25';
+const CACHE_NAME = 'arm-mascotas-v26';
 
 const ARCHIVOS_SHELL = [
     '/index.html',

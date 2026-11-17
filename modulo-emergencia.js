@@ -3,7 +3,7 @@
 // Depende de: config.js, utils.js
 // El markup vive fijo en app.html (#emergenciaOverlay), fuera del
 // #appShell, así que este módulo se autoinicializa al cargar.
-// No hace diagnósticos: solo ubica veterinarias cercanas en Google
+// No hace diagnósticos: solo ubica veterinarias abiertas y cercanas en Google
 // Maps y permite compartir la ubicación del usuario.
 // Expone window.Emergencia.
 // ================================================================
@@ -42,7 +42,9 @@ const Emergencia = (() => {
         Utils.setLoading(btn, true, 'Obteniendo ubicación...');
         try {
             const { lat, lng } = await obtenerUbicacion();
-            const url = `https://www.google.com/maps/search/veterinaria+urgencia+24+horas/@${lat},${lng},14z`;
+            // "Abierta ahora" (no "urgencia 24 horas"): de día muestra la clínica abierta más cercana y de noche solo las
+            // que siguen abiertas (las 24 h). Con "24 horas" se descartaban las cercanas que sí estaban atendiendo.
+            const url = `https://www.google.com/maps/search/veterinaria+abierta+ahora/@${lat},${lng},15z`;
             window.open(url, '_blank');
         } catch (e) {
             mensaje.textContent = e.message;
